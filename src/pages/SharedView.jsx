@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { calculateAge } from '../utils/ageCalculator';
 import { getVaccineStatus, getVaccineProgress, getVaccinationStage } from '../utils/vaccineEngine';
+import { sanitizeString, validateDob, validateBase64Json } from '../utils/validation';
 import Card from '../components/Card';
 import ProgressBar from '../components/ProgressBar';
 import Header from '../components/Header';
@@ -10,35 +11,39 @@ import Footer from '../components/Footer';
 
 const SharedView = () => {
   const [searchParams] = useSearchParams();
-  const name = searchParams.get('name');
-  const dob = searchParams.get('dob');
+  const nameParam = searchParams.get('name');
+  const dobParam = searchParams.get('dob');
   const vaccinesParam = searchParams.get('v');
 
   const [babyData, setBabyData] = useState(null);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    if (name && dob) {
-      // Decode vaccines data if present
-      let vaccines = {};
-      if (vaccinesParam) {
-        try {
-          vaccines = JSON.parse(atob(vaccinesParam));
-        } catch (e) {
-          console.error('Failed to decode vaccines data:', e);
-        }
-      }
-      setBabyData({ name, dob, vaccines });
-    }
-  }, [name, dob, vaccinesParam]);
+    // Validate and sanitize inputs
+    const name = sanitizeString(nameParam, 50);
+    const dobValidation = validateDob(dobParam);
+    const vaccinesValidation = validateBase64Json(vaccinesParam);
 
-  if (!babyData) {
+    if (!name || !dobValidation.isValid) {
+      setError('Invalid or missing data in share link');
+      return;
+    }
+
+    setBabyData({
+      name,
+      dob: dobValidation.value,
+      vaccines: vaccinesValidation.value
+    });
+  }, [nameParam, dobParam, vaccinesParam]);
+
+  if (!babyData || error) {
     return (
       <div className="min-h-screen gradient-mesh flex flex-col">
         <div className="flex-1 flex items-center justify-center p-4">
           <Card className="text-center max-w-md">
             <h2 className="text-2xl font-semibold mb-2 text-gray-900 dark:text-gray-100">Invalid Share Link</h2>
             <p className="text-gray-600 dark:text-gray-400">
-              This share link is missing required information.
+              {error || 'This share link is missing required information.'}
             </p>
           </Card>
         </div>
