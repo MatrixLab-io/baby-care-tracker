@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   ShareIcon,
@@ -22,10 +22,45 @@ import Header from '../components/Header';
 import { CardLoader } from '../components/LoadingCard';
 import Footer from '../components/Footer';
 
+const TABS = [
+  { id: 'vaccines', label: 'Vaccines', icon: null, emoji: '💉' },
+  { id: 'milestones', label: 'Milestones', icon: TrophyIcon },
+  { id: 'growth', label: 'Growth', icon: ChartBarIcon },
+  { id: 'records', label: 'Records', icon: DocumentTextIcon }
+];
+
 const Dashboard = () => {
   const navigate = useNavigate();
   const { currentBaby, babies, switchBaby, toggleVaccineStatus, deleteMedicalRecord, loading } = useBaby();
   const [activeTab, setActiveTab] = useState('vaccines');
+  const tabsContainerRef = useRef(null);
+  const tabRefs = useRef({});
+
+  const handleTabClick = (tabId) => {
+    setActiveTab(tabId);
+
+    // Auto-scroll to show the clicked tab
+    const tabElement = tabRefs.current[tabId];
+    const container = tabsContainerRef.current;
+
+    if (tabElement && container) {
+      const tabIndex = TABS.findIndex(t => t.id === tabId);
+
+      if (tabIndex === 0) {
+        // First tab - scroll to start
+        container.scrollTo({ left: 0, behavior: 'smooth' });
+      } else if (tabIndex === TABS.length - 1) {
+        // Last tab - scroll to end
+        container.scrollTo({ left: container.scrollWidth, behavior: 'smooth' });
+      } else {
+        // Middle tabs - center the tab
+        const containerRect = container.getBoundingClientRect();
+        const tabRect = tabElement.getBoundingClientRect();
+        const scrollLeft = tabElement.offsetLeft - (containerRect.width / 2) + (tabRect.width / 2);
+        container.scrollTo({ left: scrollLeft, behavior: 'smooth' });
+      }
+    }
+  };
 
   const formatFileSize = (bytes) => {
     if (bytes < 1024) return bytes + ' B';
@@ -84,12 +119,7 @@ const Dashboard = () => {
         {/* Header */}
         <Header
           showBack
-          backLabel="Home"
-          rightContent={
-            <Button variant="outline" size="sm" icon={ShareIcon} onClick={handleShareClick}>
-              Share
-            </Button>
-          }
+          backIcon
         />
 
         {/* Baby Selector */}
@@ -112,17 +142,27 @@ const Dashboard = () => {
         {/* Baby Info Card */}
         <Card className="mb-6 overflow-hidden">
           <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-6 mb-6">
-            {currentBaby.photo ? (
-              <img
-                src={currentBaby.photo}
-                alt={currentBaby.name}
-                className="w-20 h-20 sm:w-24 sm:h-24 rounded-full object-cover ring-4 ring-white/50 dark:ring-gray-700/50 shrink-0"
-              />
-            ) : (
-              <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-gradient-to-br from-indigo-400 to-purple-500 flex items-center justify-center text-white text-3xl sm:text-4xl font-bold ring-4 ring-white/50 dark:ring-gray-700/50 shrink-0">
-                {currentBaby.name.charAt(0).toUpperCase()}
-              </div>
-            )}
+            <div className="relative">
+              {currentBaby.photo ? (
+                <img
+                  src={currentBaby.photo}
+                  alt={currentBaby.name}
+                  className="w-20 h-20 sm:w-24 sm:h-24 rounded-full object-cover ring-4 ring-white/50 dark:ring-gray-700/50 shrink-0"
+                />
+              ) : (
+                <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-gradient-to-br from-indigo-400 to-purple-500 flex items-center justify-center text-white text-3xl sm:text-4xl font-bold ring-4 ring-white/50 dark:ring-gray-700/50 shrink-0">
+                  {currentBaby.name.charAt(0).toUpperCase()}
+                </div>
+              )}
+              {/* Share button on avatar */}
+              <button
+                onClick={handleShareClick}
+                className="absolute -bottom-1 -right-1 p-2 bg-indigo-500 hover:bg-indigo-600 text-white rounded-full shadow-lg transition-colors"
+                title="Share"
+              >
+                <ShareIcon className="w-4 h-4" />
+              </button>
+            </div>
             <div className="flex-1 min-w-0 text-center sm:text-left">
               <h1 className="text-2xl sm:text-4xl font-bold text-gray-900 dark:text-gray-100 mb-2 truncate">
                 {currentBaby.name}
@@ -174,29 +214,28 @@ const Dashboard = () => {
         </Card>
 
         {/* Tabs */}
-        <div className="mb-6">
-          <div className="glass-card p-1 rounded-xl flex w-full sm:w-auto sm:inline-flex gap-1">
-            {[
-              { id: 'vaccines', label: 'Vaccines', icon: null, emoji: '💉' },
-              { id: 'milestones', label: 'Milestones', icon: TrophyIcon },
-              { id: 'growth', label: 'Growth', icon: ChartBarIcon },
-              { id: 'records', label: 'Records', icon: DocumentTextIcon }
-            ].map(tab => (
+        <div
+          ref={tabsContainerRef}
+          className="mb-6 -mx-4 px-4 overflow-x-auto scrollbar-hide"
+        >
+          <div className="glass-card p-1 rounded-xl inline-flex gap-1 min-w-max">
+            {TABS.map(tab => (
               <button
                 key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`flex-1 sm:flex-none px-3 sm:px-6 py-3 font-medium rounded-lg transition-all flex items-center justify-center gap-2 cursor-pointer ${
+                ref={el => tabRefs.current[tab.id] = el}
+                onClick={() => handleTabClick(tab.id)}
+                className={`px-4 sm:px-6 py-2.5 sm:py-3 font-medium rounded-lg transition-all flex items-center justify-center gap-2 cursor-pointer whitespace-nowrap ${
                   activeTab === tab.id
                     ? 'glass-card text-indigo-600 dark:text-indigo-400 shadow-lg'
                     : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
                 }`}
               >
                 {tab.emoji ? (
-                  <span className="text-xl">{tab.emoji}</span>
+                  <span className="text-lg sm:text-xl">{tab.emoji}</span>
                 ) : (
-                  <tab.icon className="w-5 h-5" />
+                  <tab.icon className="w-4 h-4 sm:w-5 sm:h-5" />
                 )}
-                <span className="text-sm sm:text-base">{tab.label}</span>
+                <span className="text-sm">{tab.label}</span>
               </button>
             ))}
           </div>
