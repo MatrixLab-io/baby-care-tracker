@@ -3,7 +3,11 @@ import { useNavigate } from 'react-router-dom';
 import {
   ShareIcon,
   TrophyIcon,
-  ChartBarIcon
+  ChartBarIcon,
+  DocumentTextIcon,
+  DocumentIcon,
+  TrashIcon,
+  ArrowDownTrayIcon
 } from '@heroicons/react/24/outline';
 import { useBaby } from '../context/BabyContext';
 import { calculateAge } from '../utils/ageCalculator';
@@ -20,8 +24,20 @@ import Footer from '../components/Footer';
 
 const Dashboard = () => {
   const navigate = useNavigate();
-  const { currentBaby, babies, switchBaby, toggleVaccineStatus, loading } = useBaby();
+  const { currentBaby, babies, switchBaby, toggleVaccineStatus, deleteMedicalRecord, loading } = useBaby();
   const [activeTab, setActiveTab] = useState('vaccines');
+
+  const formatFileSize = (bytes) => {
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+    return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+  };
+
+  const handleDeleteRecord = (recordId) => {
+    if (window.confirm('Are you sure you want to delete this medical record?')) {
+      deleteMedicalRecord(recordId);
+    }
+  };
 
   if (loading) {
     return (
@@ -111,11 +127,18 @@ const Dashboard = () => {
               <h1 className="text-2xl sm:text-4xl font-bold text-gray-900 dark:text-gray-100 mb-2 truncate">
                 {currentBaby.name}
               </h1>
-              {currentBaby.gender && (
-                <p className="text-gray-600 dark:text-gray-400 mb-3">
-                  {currentBaby.gender === 'male' ? '👦 Boy' : '👧 Girl'}
-                </p>
-              )}
+              <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 mb-3">
+                {currentBaby.gender && (
+                  <span className="text-gray-600 dark:text-gray-400">
+                    {currentBaby.gender === 'male' ? '👦 Boy' : '👧 Girl'}
+                  </span>
+                )}
+                {currentBaby.bloodGroup && (
+                  <span className="px-2 py-1 text-sm font-semibold bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 rounded-lg">
+                    🩸 {currentBaby.bloodGroup}
+                  </span>
+                )}
+              </div>
               {age && (
                 <div className="flex flex-wrap justify-center sm:justify-start gap-2 sm:gap-4 text-sm">
                   <div className="glass px-3 sm:px-4 py-2 rounded-lg">
@@ -156,7 +179,8 @@ const Dashboard = () => {
             {[
               { id: 'vaccines', label: 'Vaccines', icon: null, emoji: '💉' },
               { id: 'milestones', label: 'Milestones', icon: TrophyIcon },
-              { id: 'growth', label: 'Growth', icon: ChartBarIcon }
+              { id: 'growth', label: 'Growth', icon: ChartBarIcon },
+              { id: 'records', label: 'Records', icon: DocumentTextIcon }
             ].map(tab => (
               <button
                 key={tab.id}
@@ -201,6 +225,90 @@ const Dashboard = () => {
         {activeTab === 'milestones' && <MilestoneTracker />}
 
         {activeTab === 'growth' && <GrowthTracker />}
+
+        {activeTab === 'records' && (
+          <Card>
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100">
+                Medical Records
+              </h2>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => navigate(`/edit-baby/${currentBaby.id}`)}
+              >
+                Upload New
+              </Button>
+            </div>
+
+            {(!currentBaby.medicalRecords || currentBaby.medicalRecords.length === 0) ? (
+              <div className="text-center py-12">
+                <DocumentIcon className="w-16 h-16 mx-auto text-gray-300 dark:text-gray-600 mb-4" />
+                <p className="text-gray-500 dark:text-gray-400 mb-4">No medical records uploaded yet</p>
+                <Button
+                  size="sm"
+                  onClick={() => navigate(`/edit-baby/${currentBaby.id}`)}
+                >
+                  Upload Records
+                </Button>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {currentBaby.medicalRecords.map(record => (
+                  <div key={record.id} className="glass flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-xl gap-3">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className={`p-2 rounded-lg ${
+                        record.type === 'application/pdf'
+                          ? 'bg-red-100 dark:bg-red-900/30'
+                          : 'bg-blue-100 dark:bg-blue-900/30'
+                      }`}>
+                        <DocumentIcon className={`w-6 h-6 ${
+                          record.type === 'application/pdf'
+                            ? 'text-red-600 dark:text-red-400'
+                            : 'text-blue-600 dark:text-blue-400'
+                        }`} />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="font-medium text-gray-900 dark:text-gray-100 truncate">{record.name}</p>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">
+                          {formatFileSize(record.size)} • {new Date(record.uploadedAt).toLocaleDateString()}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 shrink-0 self-end sm:self-auto">
+                      <a
+                        href={record.data}
+                        download={record.name}
+                        className="p-2 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 rounded-lg transition-colors"
+                        title="Download"
+                      >
+                        <ArrowDownTrayIcon className="w-5 h-5" />
+                      </a>
+                      {record.type.startsWith('image/') && (
+                        <a
+                          href={record.data}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="p-2 text-green-600 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/30 rounded-lg transition-colors"
+                          title="View"
+                        >
+                          <DocumentTextIcon className="w-5 h-5" />
+                        </a>
+                      )}
+                      <button
+                        onClick={() => handleDeleteRecord(record.id)}
+                        className="p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors"
+                        title="Delete"
+                      >
+                        <TrashIcon className="w-5 h-5" />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </Card>
+        )}
       </div>
 
       <Footer />

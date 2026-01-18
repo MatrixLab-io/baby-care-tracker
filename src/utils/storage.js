@@ -44,10 +44,12 @@ export const addBaby = (babyData) => {
     name: babyData.name,
     dob: babyData.dob,
     gender: babyData.gender || '',
+    bloodGroup: babyData.bloodGroup || '',
     photo: babyData.photo || '',
     vaccines: {},
     milestones: [],
     growthRecords: [],
+    medicalRecords: babyData.medicalRecords || [],
     createdAt: new Date().toISOString()
   };
 
@@ -156,4 +158,32 @@ export const deleteGrowthRecord = (babyId, recordId) => {
 
   const growthRecords = (baby.growthRecords || []).filter(r => r.id !== recordId);
   return updateBaby(babyId, { growthRecords });
+};
+
+/**
+ * Add medical record
+ */
+export const addMedicalRecord = (babyId, record) => {
+  const baby = getBabyById(babyId);
+  if (!baby) return null;
+
+  const medicalRecords = [...(baby.medicalRecords || [])];
+  medicalRecords.push({
+    id: Date.now().toString(),
+    ...record,
+    uploadedAt: new Date().toISOString()
+  });
+
+  return updateBaby(babyId, { medicalRecords });
+};
+
+/**
+ * Delete medical record
+ */
+export const deleteMedicalRecord = (babyId, recordId) => {
+  const baby = getBabyById(babyId);
+  if (!baby) return null;
+
+  const medicalRecords = (baby.medicalRecords || []).filter(r => r.id !== recordId);
+  return updateBaby(babyId, { medicalRecords });
 };

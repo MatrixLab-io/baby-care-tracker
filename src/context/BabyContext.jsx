@@ -8,7 +8,9 @@ import {
   addMilestone as addMilestoneToStorage,
   deleteMilestone as deleteMilestoneFromStorage,
   addGrowthRecord as addGrowthRecordToStorage,
-  deleteGrowthRecord as deleteGrowthRecordFromStorage
+  deleteGrowthRecord as deleteGrowthRecordFromStorage,
+  addMedicalRecord as addMedicalRecordToStorage,
+  deleteMedicalRecord as deleteMedicalRecordFromStorage
 } from '../utils/storage';
 
 const BabyContext = createContext();
@@ -117,6 +119,24 @@ export const BabyProvider = ({ children }) => {
     }
   };
 
+  const addMedicalRecord = (record) => {
+    if (!currentBabyId) return;
+
+    const updated = addMedicalRecordToStorage(currentBabyId, record);
+    if (updated) {
+      setBabies(babies.map(baby => baby.id === currentBabyId ? updated : baby));
+    }
+  };
+
+  const deleteMedicalRecord = (recordId) => {
+    if (!currentBabyId) return;
+
+    const updated = deleteMedicalRecordFromStorage(currentBabyId, recordId);
+    if (updated) {
+      setBabies(babies.map(baby => baby.id === currentBabyId ? updated : baby));
+    }
+  };
+
   const value = {
     babies,
     currentBaby,
@@ -131,6 +151,8 @@ export const BabyProvider = ({ children }) => {
     deleteMilestone,
     addGrowthRecord,
     deleteGrowthRecord,
+    addMedicalRecord,
+    deleteMedicalRecord,
     refreshBabies: loadBabies
   };
 
