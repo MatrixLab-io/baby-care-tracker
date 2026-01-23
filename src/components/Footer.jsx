@@ -17,7 +17,7 @@ const Footer = () => {
             </a>
           </p>
           <p className="text-xs text-gray-500 dark:text-gray-500">
-            Version 1.2.0
+            Version 1.3.0
           </p>
         </div>
       </div>
