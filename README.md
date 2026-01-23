@@ -11,9 +11,12 @@ A production-ready web application for tracking baby's age, vaccines, milestones
 - **Multiple Baby Profiles**: Support for tracking multiple babies
 - **Milestone Tracker**: Auto milestones (1 week, 45 days, 3 months, etc.) + custom milestones
 - **Growth Tracker**: Track weight, height, and head circumference with visual charts
+- **Medical Records**: Upload and store medical documents (PDF, images) locally
 - **Progress Tracking**: Visual progress bar showing vaccination completion
 - **Shareable Links**: Generate read-only links to share baby's vaccine schedule
 - **Dark Mode**: Elegant dark/light mode toggle with glassmorphism design
+- **PWA Support**: Install as app on mobile/desktop with offline support
+- **Auto Updates**: Get notified when a new version is available
 - **Offline Support**: All data stored locally in browser (localStorage)
 - **Privacy First**: No login required, no server, no data collection
 
@@ -80,7 +83,9 @@ npm run dev
 ```
 baby-care-tracker/
 ├── public/
-│   └── _redirects          # Netlify SPA routing configuration
+│   ├── _redirects          # Netlify SPA routing configuration
+│   ├── sw.js               # Service worker for PWA
+│   └── manifest.json       # PWA manifest
 ├── src/
 │   ├── components/         # Reusable UI components
 │   │   ├── Button.jsx
@@ -94,6 +99,7 @@ baby-care-tracker/
 │   │   ├── MilestoneTracker.jsx
 │   │   ├── GrowthTracker.jsx
 │   │   ├── ThemeToggle.jsx
+│   │   ├── UpdateNotification.jsx
 │   │   └── Footer.jsx
 │   ├── config/            # Configuration files
 │   │   └── vaccines.js    # BD EPI vaccine schedule
@@ -108,10 +114,12 @@ baby-care-tracker/
 │   ├── utils/             # Utility functions
 │   │   ├── ageCalculator.js
 │   │   ├── storage.js
+│   │   ├── validation.js
 │   │   └── vaccineEngine.js
 │   ├── App.jsx
 │   ├── main.jsx
-│   └── index.css
+│   ├── index.css
+│   └── serviceWorkerRegistration.js
 ├── index.html
 ├── netlify.toml           # Netlify configuration
 ├── package.json
@@ -212,6 +220,33 @@ This app follows the Bangladesh EPI schedule. Always consult with a qualified he
 - Firefox (latest)
 - Safari (latest)
 - Edge (latest)
+
+## Changelog
+
+### v1.3.0
+- Added PWA update notification - users get notified when a new version is available
+- Added medical records upload and view functionality (PDF, JPG, PNG)
+- Improved UI with consistent glassmorphism border styling
+- Fixed service worker caching issues with browser extensions
+- Fixed tab focus outline for smoother transitions
+- Improved image viewing with blob URL conversion
+
+### v1.2.0
+- Added medical records support in baby management
+- Improved responsiveness and styling across components
+- Added Open Graph image and meta tags
+- Added initial loader animation
+
+### v1.1.0
+- Added milestone tracker with auto and custom milestones
+- Added growth tracker with charts
+- Added shareable links feature
+
+### v1.0.0
+- Initial release with vaccine tracking
+- Bangladesh EPI schedule implementation
+- Multiple baby profiles support
+- Dark mode support
 
 ## License
 

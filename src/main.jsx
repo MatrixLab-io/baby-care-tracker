@@ -22,5 +22,10 @@ createRoot(document.getElementById('root')).render(
 // Hide loader after React mounts
 hideLoader();
 
-// Register service worker for PWA
-serviceWorkerRegistration.register()
+// Register service worker for PWA with update notification
+serviceWorkerRegistration.register({
+  onUpdate: (registration) => {
+    // Dispatch custom event for UpdateNotification component
+    window.dispatchEvent(new CustomEvent('swUpdateAvailable', { detail: registration }));
+  }
+})

@@ -7,7 +7,8 @@ import {
   DocumentTextIcon,
   DocumentIcon,
   TrashIcon,
-  ArrowDownTrayIcon
+  ArrowDownTrayIcon,
+  EyeIcon
 } from '@heroicons/react/24/outline';
 import { useBaby } from '../context/BabyContext';
 import { calculateAge } from '../utils/ageCalculator';
@@ -72,6 +73,20 @@ const Dashboard = () => {
     if (window.confirm('Are you sure you want to delete this medical record?')) {
       deleteMedicalRecord(recordId);
     }
+  };
+
+  const handleViewRecord = (record) => {
+    // Convert base64 data URL to blob URL for viewing
+    const byteString = atob(record.data.split(',')[1]);
+    const mimeType = record.type;
+    const ab = new ArrayBuffer(byteString.length);
+    const ia = new Uint8Array(ab);
+    for (let i = 0; i < byteString.length; i++) {
+      ia[i] = byteString.charCodeAt(i);
+    }
+    const blob = new Blob([ab], { type: mimeType });
+    const blobUrl = URL.createObjectURL(blob);
+    window.open(blobUrl, '_blank');
   };
 
   if (loading) {
@@ -224,7 +239,7 @@ const Dashboard = () => {
                 key={tab.id}
                 ref={el => tabRefs.current[tab.id] = el}
                 onClick={() => handleTabClick(tab.id)}
-                className={`px-4 sm:px-6 py-2.5 sm:py-3 font-medium rounded-lg transition-all flex items-center justify-center gap-2 cursor-pointer whitespace-nowrap ${
+                className={`px-4 sm:px-6 py-2.5 sm:py-3 font-medium rounded-lg transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer whitespace-nowrap outline-none focus:outline-none ${
                   activeTab === tab.id
                     ? 'glass-card border border-white/10 text-indigo-600 dark:text-indigo-400 shadow-lg'
                     : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
@@ -271,13 +286,15 @@ const Dashboard = () => {
               <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100">
                 Medical Records
               </h2>
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() => navigate(`/edit-baby/${currentBaby.id}`)}
-              >
-                Upload New
-              </Button>
+              {currentBaby.medicalRecords?.length > 0 && (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => navigate(`/edit-baby/${currentBaby.id}`)}
+                >
+                  Upload New
+                </Button>
+              )}
             </div>
 
             {(!currentBaby.medicalRecords || currentBaby.medicalRecords.length === 0) ? (
@@ -324,15 +341,13 @@ const Dashboard = () => {
                         <ArrowDownTrayIcon className="w-5 h-5" />
                       </a>
                       {record.type.startsWith('image/') && (
-                        <a
-                          href={record.data}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="p-2 text-green-600 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/30 rounded-lg transition-colors"
+                        <button
+                          onClick={() => handleViewRecord(record)}
+                          className="p-2 text-green-600 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/30 rounded-lg transition-colors cursor-pointer"
                           title="View"
                         >
-                          <DocumentTextIcon className="w-5 h-5" />
-                        </a>
+                          <EyeIcon className="w-5 h-5" />
+                        </button>
                       )}
                       <button
                         onClick={() => handleDeleteRecord(record.id)}

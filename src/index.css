@@ -26,7 +26,7 @@ html, body {
 }
 
 .dark .glass {
-  background: rgba(183, 223, 207, 0.1) !important;
+  background: rgba(255, 255, 255, 0.1) !important;
 }
 
 .glass-card {
@@ -95,4 +95,20 @@ button.delete-icon {
 
 .dark button.delete-icon {
   color: #f87171 !important;
+}
+
+/* Slide up animation for notifications */
+@keyframes slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-slide-up {
+  animation: slide-up 0.3s ease-out;
 }

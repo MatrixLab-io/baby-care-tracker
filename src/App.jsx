@@ -6,6 +6,7 @@ import AddEditBaby from './pages/AddEditBaby';
 import Dashboard from './pages/Dashboard';
 import SharedView from './pages/SharedView';
 import FeedbackButton from './components/FeedbackButton';
+import UpdateNotification from './components/UpdateNotification';
 
 function App() {
   return (
@@ -20,6 +21,7 @@ function App() {
             <Route path="/share" element={<SharedView />} />
           </Routes>
           <FeedbackButton />
+          <UpdateNotification />
         </BabyProvider>
       </Router>
     </ThemeProvider>

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'mybabycare-v1';
+const CACHE_NAME = 'mybabycare-v1.3.0';
 const urlsToCache = [
   '/',
   '/index.html',
