@@ -1,9 +1,9 @@
-const ProgressBar = ({ completed, total, percentage }) => {
+const ProgressBar = ({ completed, total, percentage, label }) => {
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
         <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-          {completed} of {total} vaccines completed
+          {label || `${completed} of ${total} vaccines completed`}
         </span>
         <span className="text-lg font-bold bg-gradient-to-r from-indigo-600 to-purple-600 dark:from-indigo-400 dark:to-purple-400 bg-clip-text text-transparent">
           {percentage}%

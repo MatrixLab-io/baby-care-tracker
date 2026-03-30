@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { calculateAge } from '../utils/ageCalculator';
-import { getVaccineStatus, getVaccineProgress, getVaccinationStage } from '../utils/vaccineEngine';
+import { getVaccineStatus, getVaccineProgress, getVaccinationStage, getPrivateVaccineStatus, getCombinedProgress } from '../utils/vaccineEngine';
 import { sanitizeString, validateDob, validateBase64Json } from '../utils/validation';
 import Card from '../components/Card';
 import ProgressBar from '../components/ProgressBar';
@@ -54,7 +54,10 @@ const SharedView = () => {
 
   const age = calculateAge(babyData.dob);
   const vaccines = getVaccineStatus(babyData.dob, babyData.vaccines || {});
+  const privateVaccines = getPrivateVaccineStatus(babyData.dob, babyData.vaccines || {});
   const progress = getVaccineProgress(vaccines);
+  const privateProgress = getVaccineProgress(privateVaccines);
+  const combinedProgress = getCombinedProgress(vaccines, privateVaccines);
   const stage = getVaccinationStage(vaccines);
 
   return (
@@ -93,10 +96,19 @@ const SharedView = () => {
 
           <div className="border-t border-gray-200 dark:border-gray-700 pt-4 mt-4">
             <ProgressBar
-              completed={progress.completed}
-              total={progress.total}
-              percentage={progress.percentage}
+              completed={combinedProgress.completed}
+              total={combinedProgress.total}
+              percentage={combinedProgress.percentage}
+              label="Overall Vaccination Progress"
             />
+            <div className="mt-3 flex flex-wrap justify-center gap-2">
+              <span className="text-xs px-3 py-1 rounded-full bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 font-medium">
+                EPI: {progress.completed}/{progress.total}
+              </span>
+              <span className="text-xs px-3 py-1 rounded-full bg-purple-50 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 font-medium">
+                Private: {privateProgress.completed}/{privateProgress.total}
+              </span>
+            </div>
             <div className="mt-3 text-center">
               <span className="text-sm text-gray-700 dark:text-gray-200 bg-blue-50 dark:bg-blue-900/30 px-3 py-1 rounded-full">
                 {stage}
@@ -105,13 +117,71 @@ const SharedView = () => {
           </div>
         </Card>
 
-        {/* Vaccines */}
+        {/* EPI Vaccines */}
         <Card>
-          <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-4">
-            Vaccine Schedule
-          </h2>
+          <div className="flex items-center gap-3 mb-1">
+            <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">
+              EPI Vaccine Schedule
+            </h2>
+            <span className="px-2.5 py-1 text-xs font-semibold bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 rounded-full">
+              Government
+            </span>
+          </div>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
+            {progress.completed}/{progress.total} completed
+          </p>
           <div className="space-y-3">
             {vaccines.map(vaccine => (
+              <div
+                key={vaccine.key}
+                className="border-l-4 border-gray-300 dark:border-gray-600 p-4 rounded-r-lg bg-gray-50 dark:bg-gray-800/50"
+              >
+                <div className="flex items-start justify-between">
+                  <div>
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="text-2xl">{STATUS_ICONS[vaccine.status]}</span>
+                      <h3 className="font-semibold text-gray-900 dark:text-gray-100">{vaccine.label}</h3>
+                    </div>
+                    <div className="mb-2">
+                      <span className="inline-flex items-center gap-2 text-xs">
+                        <span className="px-2 py-1 rounded-md bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300 font-medium">
+                          {vaccine.ageLabel}
+                        </span>
+                        <span className="px-2 py-1 rounded-md bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300">
+                          {vaccine.ageDays}
+                        </span>
+                      </span>
+                    </div>
+                    <div className="space-y-1">
+                      <p className="text-sm text-gray-600 dark:text-gray-400">
+                        <span className="font-medium">Due Date:</span> {vaccine.dueDate}
+                      </p>
+                      <p className={`text-sm font-medium inline-block px-2 py-1 rounded ${STATUS_COLORS[vaccine.status]}`}>
+                        {vaccine.statusMessage}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </Card>
+
+        {/* Private Vaccines */}
+        <Card className="mt-6">
+          <div className="flex items-center gap-3 mb-1">
+            <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">
+              Private Vaccination Schedule
+            </h2>
+            <span className="px-2.5 py-1 text-xs font-semibold bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300 rounded-full">
+              Private
+            </span>
+          </div>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
+            {privateProgress.completed}/{privateProgress.total} completed
+          </p>
+          <div className="space-y-3">
+            {privateVaccines.map(vaccine => (
               <div
                 key={vaccine.key}
                 className="border-l-4 border-gray-300 dark:border-gray-600 p-4 rounded-r-lg bg-gray-50 dark:bg-gray-800/50"
@@ -154,8 +224,9 @@ const SharedView = () => {
             <div>
               <h4 className="font-semibold text-gray-900 dark:text-gray-100 mb-1">Medical Disclaimer</h4>
               <p className="text-sm text-gray-700 dark:text-gray-300">
-                This app follows the Bangladesh EPI schedule. Always consult with a qualified
-                healthcare professional for medical advice and vaccination guidance.
+                This app follows the Bangladesh EPI schedule and includes additional private
+                vaccination recommendations. Always consult with a qualified healthcare
+                professional for medical advice and vaccination guidance.
               </p>
             </div>
           </div>
