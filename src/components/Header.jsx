@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import ThemeToggle from './ThemeToggle';
 import PrivacyNotice from './PrivacyNotice';
+import WhatsNew from './WhatsNew';
 import UserMenu from './auth/UserMenu';
 
 const BabyIcon = () => (
@@ -71,6 +72,7 @@ const Header = ({ showBack = false, backPath = '/', backLabel = 'Back', backIcon
       {/* Right side - Actions */}
       <div className="flex items-center gap-2">
         {rightContent}
+        <WhatsNew />
         <PrivacyNotice />
         <ThemeToggle />
         <UserMenu />

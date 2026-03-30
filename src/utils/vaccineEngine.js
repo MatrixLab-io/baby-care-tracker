@@ -1,13 +1,15 @@
 import { BD_EPI_SCHEDULE, VACCINE_STATUS } from '../config/vaccines';
+import { PRIVATE_VACCINE_SCHEDULE } from '../config/privateVaccines';
 import { calculateAge, getDaysUntilVaccine, calculateVaccineDueDate } from './ageCalculator';
 
 /**
  * Get vaccine status and details for a baby
  * @param {string} dob - Date of birth
  * @param {Object} completedVaccines - Object with vaccine keys as true/false
+ * @param {Array} schedule - Vaccine schedule to use (defaults to BD_EPI_SCHEDULE)
  * @returns {Array} Array of vaccine objects with status
  */
-export const getVaccineStatus = (dob, completedVaccines = {}) => {
+export const getVaccineStatus = (dob, completedVaccines = {}, schedule = BD_EPI_SCHEDULE) => {
   if (!dob) return [];
 
   const age = calculateAge(dob);
@@ -15,7 +17,7 @@ export const getVaccineStatus = (dob, completedVaccines = {}) => {
 
   const currentDays = age.totalDays;
 
-  return BD_EPI_SCHEDULE.map(vaccine => {
+  return schedule.map(vaccine => {
     const isCompleted = completedVaccines[vaccine.key] === true;
     const daysUntil = getDaysUntilVaccine(dob, vaccine.day);
     const dueDate = calculateVaccineDueDate(dob, vaccine.day);
@@ -108,4 +110,25 @@ export const getVaccinationStage = (vaccines) => {
 
   const lastCompleted = completed[completed.length - 1];
   return `Vaccinated up to ${lastCompleted.ageLabel}`;
+};
+
+/**
+ * Get private vaccine status for a baby
+ */
+export const getPrivateVaccineStatus = (dob, completedVaccines = {}) => {
+  return getVaccineStatus(dob, completedVaccines, PRIVATE_VACCINE_SCHEDULE);
+};
+
+/**
+ * Get combined progress for both EPI and private vaccines
+ */
+export const getCombinedProgress = (epiVaccines, privateVaccines) => {
+  const epi = getVaccineProgress(epiVaccines);
+  const pvt = getVaccineProgress(privateVaccines);
+
+  const total = epi.total + pvt.total;
+  const completed = epi.completed + pvt.completed;
+  const percentage = total > 0 ? Math.round((completed / total) * 100) : 0;
+
+  return { total, completed, remaining: total - completed, percentage };
 };

@@ -13,7 +13,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { useBaby } from '../context/BabyContext';
 import { calculateAge } from '../utils/ageCalculator';
-import { getVaccineStatus, getVaccineProgress, getVaccinationStage, getOverdueVaccines } from '../utils/vaccineEngine';
+import { getVaccineStatus, getVaccineProgress, getVaccinationStage, getOverdueVaccines, getPrivateVaccineStatus, getCombinedProgress } from '../utils/vaccineEngine';
 import Card from '../components/Card';
 import Button from '../components/Button';
 import VaccineCard from '../components/VaccineCard';
@@ -22,6 +22,7 @@ import MilestoneTracker from '../components/MilestoneTracker';
 import GrowthTracker from '../components/GrowthTracker';
 import Header from '../components/Header';
 import { CardLoader } from '../components/LoadingCard';
+import OutbreakAlert from '../components/OutbreakAlert';
 import Footer from '../components/Footer';
 
 const TABS = [
@@ -118,9 +119,13 @@ const Dashboard = () => {
 
   const age = calculateAge(currentBaby.dob);
   const vaccines = getVaccineStatus(currentBaby.dob, currentBaby.vaccines);
+  const privateVaccines = getPrivateVaccineStatus(currentBaby.dob, currentBaby.vaccines);
   const progress = getVaccineProgress(vaccines);
+  const privateProgress = getVaccineProgress(privateVaccines);
+  const combinedProgress = getCombinedProgress(vaccines, privateVaccines);
   const stage = getVaccinationStage(vaccines);
   const overdueVaccines = getOverdueVaccines(vaccines);
+  const overduePrivateVaccines = getOverdueVaccines(privateVaccines);
 
   const handleShareClick = () => {
     // Encode vaccines data for sharing
@@ -164,6 +169,9 @@ const Dashboard = () => {
             </select>
           </div>
         )}
+
+        {/* Outbreak Alerts */}
+        <OutbreakAlert completedVaccines={currentBaby.vaccines || {}} />
 
         {/* Baby Info Card */}
         <Card className="mb-6 overflow-hidden">
@@ -222,17 +230,26 @@ const Dashboard = () => {
           {/* Progress Summary */}
           <div className="border-t border-gray-200 dark:border-gray-700 pt-6 mt-6">
             <ProgressBar
-              completed={progress.completed}
-              total={progress.total}
-              percentage={progress.percentage}
+              completed={combinedProgress.completed}
+              total={combinedProgress.total}
+              percentage={combinedProgress.percentage}
+              label="Overall Vaccination Progress"
             />
+            <div className="mt-3 flex flex-wrap gap-2 text-xs">
+              <span className="px-3 py-1.5 rounded-full bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 font-medium">
+                EPI: {progress.completed}/{progress.total}
+              </span>
+              <span className="px-3 py-1.5 rounded-full bg-purple-50 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 font-medium">
+                Private: {privateProgress.completed}/{privateProgress.total}
+              </span>
+            </div>
             <div className="mt-4 flex items-center justify-between flex-wrap gap-3">
               <span className="text-sm text-gray-700 dark:text-gray-300 glass border border-white/10 px-4 py-2 rounded-full font-medium">
                 {stage}
               </span>
-              {overdueVaccines.length > 0 && (
+              {(overdueVaccines.length + overduePrivateVaccines.length) > 0 && (
                 <span className="text-sm text-red-600 dark:text-red-400 glass border border-white/10 px-4 py-2 rounded-full font-medium">
-                  ⚠️ {overdueVaccines.length} vaccine{overdueVaccines.length > 1 ? 's' : ''} overdue
+                  ⚠️ {overdueVaccines.length + overduePrivateVaccines.length} vaccine{(overdueVaccines.length + overduePrivateVaccines.length) > 1 ? 's' : ''} overdue
                 </span>
               )}
             </div>
@@ -269,13 +286,47 @@ const Dashboard = () => {
 
         {/* Tab Content */}
         {activeTab === 'vaccines' && (
-          <div className="space-y-4">
+          <div className="space-y-6">
+            {/* EPI Vaccines */}
             <Card>
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-6">
-                Bangladesh EPI Vaccine Schedule
-              </h2>
+              <div className="flex items-center gap-3 mb-2">
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+                  Bangladesh EPI Vaccine Schedule
+                </h2>
+                <span className="px-2.5 py-1 text-xs font-semibold bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 rounded-full">
+                  Government
+                </span>
+              </div>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
+                Expanded Programme on Immunization ({progress.completed}/{progress.total} completed)
+              </p>
               <div className="space-y-4">
                 {vaccines.map(vaccine => (
+                  <VaccineCard
+                    key={vaccine.key}
+                    vaccine={vaccine}
+                    onToggle={handleVaccineToggle}
+                    isLoading={loadingVaccineKey === vaccine.key}
+                  />
+                ))}
+              </div>
+            </Card>
+
+            {/* Private Vaccines */}
+            <Card>
+              <div className="flex items-center gap-3 mb-2">
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+                  Private Vaccination Schedule
+                </h2>
+                <span className="px-2.5 py-1 text-xs font-semibold bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300 rounded-full">
+                  Private
+                </span>
+              </div>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
+                Additional recommended vaccines ({privateProgress.completed}/{privateProgress.total} completed)
+              </p>
+              <div className="space-y-4">
+                {privateVaccines.map(vaccine => (
                   <VaccineCard
                     key={vaccine.key}
                     vaccine={vaccine}
