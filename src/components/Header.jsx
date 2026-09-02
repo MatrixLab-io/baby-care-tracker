@@ -3,31 +3,7 @@ import ThemeToggle from './ThemeToggle';
 import PrivacyNotice from './PrivacyNotice';
 import WhatsNew from './WhatsNew';
 import UserMenu from './auth/UserMenu';
-
-const BabyIcon = () => (
-  <svg viewBox="0 0 100 100" className="w-9 h-9">
-    <defs>
-      <linearGradient id="headerBgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-        <stop offset="0%" style={{ stopColor: '#6366f1' }} />
-        <stop offset="100%" style={{ stopColor: '#8b5cf6' }} />
-      </linearGradient>
-    </defs>
-    <circle cx="50" cy="50" r="48" fill="url(#headerBgGrad)" />
-    <circle cx="50" cy="52" r="28" fill="#fcd9b6" />
-    <ellipse cx="50" cy="30" rx="20" ry="12" fill="#4a3728" />
-    <circle cx="38" cy="32" r="6" fill="#4a3728" />
-    <circle cx="62" cy="32" r="6" fill="#4a3728" />
-    <circle cx="42" cy="50" r="4" fill="#1f2937" />
-    <circle cx="58" cy="50" r="4" fill="#1f2937" />
-    <circle cx="43" cy="49" r="1.5" fill="white" />
-    <circle cx="59" cy="49" r="1.5" fill="white" />
-    <circle cx="35" cy="58" r="5" fill="#ffb6c1" opacity="0.6" />
-    <circle cx="65" cy="58" r="5" fill="#ffb6c1" opacity="0.6" />
-    <path d="M 42 62 Q 50 70 58 62" stroke="#1f2937" strokeWidth="2.5" fill="none" strokeLinecap="round" />
-    <ellipse cx="50" cy="72" rx="8" ry="5" fill="#60a5fa" />
-    <circle cx="50" cy="72" r="3" fill="#3b82f6" />
-  </svg>
-);
+import BrandMark from './BrandMark';
 
 const Header = ({ showBack = false, backPath = '/', backLabel = 'Back', backIcon = false, rightContent = null }) => {
   const navigate = useNavigate();
@@ -41,8 +17,8 @@ const Header = ({ showBack = false, backPath = '/', backLabel = 'Back', backIcon
           onClick={() => navigate('/')}
           className="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity"
         >
-          <BabyIcon />
-          <span className="hidden sm:inline text-xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 dark:from-indigo-400 dark:to-purple-400 bg-clip-text text-transparent">
+          <BrandMark />
+          <span className="hidden sm:inline text-xl font-bold text-slate-800 dark:text-white">
             MyBabyCare
           </span>
         </div>
