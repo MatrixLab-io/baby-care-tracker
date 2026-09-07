@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
 import ProtectedLayout from './components/auth/ProtectedLayout';
@@ -22,15 +22,20 @@ function App() {
             <Route path="/auth" element={<AuthPage />} />
             <Route path="/auth/verify" element={<EmailVerifyPage />} />
             <Route path="/share" element={<SharedView />} />
-            <Route path="/welcome" element={<Landing />} />
+            <Route path="/" element={<Landing />} />
 
             {/* Protected routes - share one BabyProvider */}
             <Route element={<ProtectedLayout />}>
-              <Route path="/" element={<Home />} />
+              <Route path="/records" element={<Home />} />
               <Route path="/add-baby" element={<AddEditBaby />} />
               <Route path="/edit-baby/:id" element={<AddEditBaby />} />
               <Route path="/dashboard" element={<Dashboard />} />
             </Route>
+
+            {/* Nothing matched — including /welcome, which the landing page
+                replaced. There was no fallback before, so a bad URL rendered a
+                blank page. */}
+            <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
           <FeedbackButton />
           <UpdateNotification />

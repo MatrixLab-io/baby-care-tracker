@@ -125,7 +125,7 @@ const Dashboard = () => {
             title="No baby selected"
             message="Pick a profile from the home screen to see its dashboard."
             action={
-              <Button icon={ArrowLeftIcon} onClick={() => navigate('/')}>
+              <Button icon={ArrowLeftIcon} onClick={() => navigate('/records')}>
                 Go to home
               </Button>
             }

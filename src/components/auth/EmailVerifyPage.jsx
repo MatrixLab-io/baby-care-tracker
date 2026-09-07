@@ -37,7 +37,7 @@ const EmailVerifyPage = () => {
         await signInWithEmailLink(auth, email, window.location.href);
         window.localStorage.removeItem('emailForSignIn');
         setStatus('success');
-        setTimeout(() => navigate('/'), 1500);
+        setTimeout(() => navigate('/records'), 1500);
       } catch (err) {
         setStatus('error');
         setError(getErrorMessage(err));

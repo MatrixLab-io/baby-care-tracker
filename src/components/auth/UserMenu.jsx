@@ -8,7 +8,9 @@ import { useAuth } from '../../context/AuthContext';
 import Avatar from '../ui/Avatar';
 import PrivacyDialog from '../PrivacyDialog';
 
-const UserMenu = () => {
+// showPrivacy is off wherever there is no BabyProvider — the landing page can
+// show a signed-in user their account without loading their children.
+const UserMenu = ({ showPrivacy = true }) => {
   const { user, signOut } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const [privacyOpen, setPrivacyOpen] = useState(false);
@@ -67,10 +69,12 @@ const UserMenu = () => {
 
           {/* Your data and how to delete it sit under the account, not beside
               the theme toggle. */}
-          <button type="button" onClick={openPrivacy} className="menu-item" role="menuitem">
-            <ShieldCheckIcon className="w-[18px] h-[18px]" aria-hidden="true" />
-            Data privacy
-          </button>
+          {showPrivacy && (
+            <button type="button" onClick={openPrivacy} className="menu-item" role="menuitem">
+              <ShieldCheckIcon className="w-[18px] h-[18px]" aria-hidden="true" />
+              Data privacy
+            </button>
+          )}
 
           <button type="button" onClick={handleSignOut} className="menu-item menu-item-danger" role="menuitem">
             <ArrowRightStartOnRectangleIcon className="w-[18px] h-[18px]" aria-hidden="true" />
@@ -79,7 +83,7 @@ const UserMenu = () => {
         </div>
       )}
 
-      <PrivacyDialog isOpen={privacyOpen} onClose={() => setPrivacyOpen(false)} />
+      {showPrivacy && <PrivacyDialog isOpen={privacyOpen} onClose={() => setPrivacyOpen(false)} />}
     </div>
   );
 };

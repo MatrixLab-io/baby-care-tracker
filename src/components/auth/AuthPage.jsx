@@ -15,7 +15,7 @@ const AuthPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const location = useLocation();
 
-  const from = location.state?.from?.pathname || '/';
+  const from = location.state?.from?.pathname || '/records';
 
   if (!loading && user) {
     return <Navigate to={from} replace />;

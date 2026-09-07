@@ -2,10 +2,10 @@
   "name": "MyBabyCare - Baby Care & Vaccine Tracker",
   "short_name": "MyBabyCare",
   "description": "Track your baby's vaccines, growth, and milestones based on Bangladesh EPI schedule",
-  "start_url": "/",
+  "start_url": "/records",
   "display": "standalone",
-  "background_color": "#1e293b",
-  "theme_color": "#6366f1",
+  "background_color": "#f1f1f1",
+  "theme_color": "#0d9488",
   "orientation": "portrait-primary",
   "scope": "/",
   "icons": [

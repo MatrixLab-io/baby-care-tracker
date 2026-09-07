@@ -11,12 +11,13 @@ import UserMenu from './auth/UserMenu';
  */
 const Header = ({
   showBack = false,
-  backPath = '/',
+  backPath = '/records',
   backLabel = 'Back',
   rightContent = null,
   showWhatsNew = true,
   showUser = true,
   showHome = true,
+  showPrivacy = true,
 }) => {
   const navigate = useNavigate();
 
@@ -42,7 +43,7 @@ const Header = ({
           {showHome && (
             <button
               type="button"
-              onClick={() => navigate('/welcome')}
+              onClick={() => navigate('/')}
               className="btn btn-secondary btn-sm w-9 px-0"
               aria-label="About MyBabyCare"
               title="About MyBabyCare"
@@ -52,7 +53,7 @@ const Header = ({
           )}
           {showWhatsNew && <WhatsNew />}
           <ThemeToggle />
-          {showUser && <UserMenu />}
+          {showUser && <UserMenu showPrivacy={showPrivacy} />}
         </div>
       </div>
     </header>

@@ -204,7 +204,7 @@ const AddEditBaby = () => {
           })),
         });
       }
-      navigate('/');
+      navigate('/records');
     } catch (err) {
       console.error('Error saving baby:', err);
       setErrors({ submit: getErrorMessage(err) });
@@ -371,7 +371,7 @@ const AddEditBaby = () => {
           {errors.submit && <Alert tone="danger" className="mt-5">{errors.submit}</Alert>}
 
           <div className="flex gap-3 mt-6">
-            <Button type="button" variant="secondary" onClick={() => navigate('/')} fullWidth disabled={isSaving}>
+            <Button type="button" variant="secondary" onClick={() => navigate('/records')} fullWidth disabled={isSaving}>
               Cancel
             </Button>
             <Button

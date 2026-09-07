@@ -83,17 +83,21 @@ const Landing = () => {
   // Signed-in visitors reach this page from the header, so send them back to
   // their own records rather than offering a sign-in they already have.
   const signedIn = Boolean(user);
-  const ctaLabel = signedIn ? 'Open my records' : 'Sign in';
-  const goToApp = () => navigate(signedIn ? '/' : '/auth');
+  const ctaLabel = signedIn ? 'My records' : 'Sign in';
+  const goToApp = () => navigate(signedIn ? '/records' : '/auth');
 
   return (
     <div className="min-h-screen flex flex-col bg-ground">
+      {/* Signed in, the bar carries the way back into the app plus the account
+          menu. Privacy lives behind BabyProvider, which this page does not
+          mount, so it stays out of the menu here. */}
       <Header
-        showUser={false}
+        showUser={signedIn}
+        showPrivacy={false}
         showWhatsNew={false}
         showHome={false}
         rightContent={
-          <Button size="sm" onClick={goToApp}>
+          <Button size="sm" variant={signedIn ? 'secondary' : 'primary'} onClick={goToApp}>
             {ctaLabel}
           </Button>
         }
@@ -127,7 +131,7 @@ const Landing = () => {
                 className="sm:w-64"
               />
               <Button size="lg" icon={ArrowRightIcon} onClick={goToApp} className="sm:mb-6">
-                {signedIn ? 'Open my records' : 'Sign in to start'}
+                {signedIn ? 'Go to my records' : 'Sign in to start'}
               </Button>
             </div>
           </div>
