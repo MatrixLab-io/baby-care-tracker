@@ -4,7 +4,7 @@ import Badge from './ui/Badge';
 import Modal from './ui/Modal';
 import Spinner from './ui/Spinner';
 
-const REPO = 'ImtiazEpu/baby-care-tracker';
+const REPO = 'MatrixLab-io/baby-care-tracker';
 const SEEN_KEY = 'whatsNewSeenVersion';
 
 function parseMarkdown(text) {
