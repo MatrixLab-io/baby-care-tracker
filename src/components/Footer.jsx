@@ -15,7 +15,7 @@ const Footer = () => {
             MatrixLab
           </a>
         </p>
-        <p className="text-xs text-ink-3">Version 1.5.0</p>
+        <p className="text-xs text-ink-3">Version 1.6.0</p>
       </div>
     </footer>
   );
