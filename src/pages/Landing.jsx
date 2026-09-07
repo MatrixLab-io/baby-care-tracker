@@ -89,7 +89,6 @@ const Landing = () => {
   return (
     <div className="min-h-screen flex flex-col bg-ground">
       <Header
-        showPrivacy={false}
         showUser={false}
         showWhatsNew={false}
         showHome={false}

@@ -2,13 +2,12 @@ import { useNavigate } from 'react-router-dom';
 import { ArrowLeftIcon, HomeIcon } from '@heroicons/react/24/outline';
 import Logo from './ui/Logo';
 import ThemeToggle from './ui/ThemeToggle';
-import PrivacyNotice from './PrivacyNotice';
 import WhatsNew from './WhatsNew';
 import UserMenu from './auth/UserMenu';
 
 /**
  * One flat sticky bar on every screen: brand left, actions right, an optional
- * back link between them. `showPrivacy`/`showUser` come off for public routes.
+ * back link between them. `showUser` comes off for public routes.
  */
 const Header = ({
   showBack = false,
@@ -16,7 +15,6 @@ const Header = ({
   backLabel = 'Back',
   rightContent = null,
   showWhatsNew = true,
-  showPrivacy = true,
   showUser = true,
   showHome = true,
 }) => {
@@ -53,7 +51,6 @@ const Header = ({
             </button>
           )}
           {showWhatsNew && <WhatsNew />}
-          {showPrivacy && <PrivacyNotice />}
           <ThemeToggle />
           {showUser && <UserMenu />}
         </div>

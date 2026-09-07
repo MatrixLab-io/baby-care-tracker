@@ -19,7 +19,7 @@ import Badge from '../components/ui/Badge';
 import Card from '../components/ui/Card';
 import SectionHeader from '../components/ui/SectionHeader';
 
-const PUBLIC_HEADER = { showPrivacy: false, showUser: false };
+const PUBLIC_HEADER = { showUser: false };
 
 const SharedView = () => {
   const [searchParams] = useSearchParams();

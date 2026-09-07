@@ -1,10 +1,5 @@
 import { useState } from 'react';
-import {
-  ArrowPathIcon,
-  ExclamationTriangleIcon,
-  InformationCircleIcon,
-  TrashIcon,
-} from '@heroicons/react/24/outline';
+import { ArrowPathIcon, ExclamationTriangleIcon, TrashIcon } from '@heroicons/react/24/outline';
 import { useBaby } from '../context/BabyContext';
 import { useAuth } from '../context/AuthContext';
 import { getErrorMessage } from '../utils/errorMessages';
@@ -21,8 +16,13 @@ const GUARANTEES = [
   'You can delete all your data at any time',
 ];
 
-const PrivacyNotice = () => {
-  const [isOpen, setIsOpen] = useState(false);
+/**
+ * Controlled: the account menu owns the trigger, because this is where your
+ * data lives and how to delete it — that belongs under the account, not as a
+ * peer of the theme toggle. Needs BabyProvider, so it only mounts on the
+ * signed-in routes.
+ */
+const PrivacyDialog = ({ isOpen, onClose }) => {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState('');
@@ -30,9 +30,9 @@ const PrivacyNotice = () => {
   const { user, signOut } = useAuth();
 
   const close = () => {
-    setIsOpen(false);
     setShowDeleteConfirm(false);
     setDeleteError('');
+    onClose?.();
   };
 
   const handleDeleteAllData = async () => {
@@ -51,16 +51,6 @@ const PrivacyNotice = () => {
 
   return (
     <>
-      <button
-        type="button"
-        onClick={() => setIsOpen(true)}
-        className="btn btn-secondary btn-sm w-9 px-0"
-        aria-label="Data privacy information"
-        title="Data privacy"
-      >
-        <InformationCircleIcon className="w-[18px] h-[18px]" aria-hidden="true" />
-      </button>
-
       <Modal
         isOpen={isOpen && !showDeleteConfirm}
         onClose={close}
@@ -82,10 +72,14 @@ const PrivacyNotice = () => {
 
           {user && (
             <div className="pt-4 border-t border-line flex flex-col gap-3">
-              <p className="text-[13px] text-ink-2">
-                Want to remove everything? This cannot be undone.
-              </p>
-              <Button variant="danger" size="sm" icon={TrashIcon} onClick={() => setShowDeleteConfirm(true)} fullWidth>
+              <p className="text-[13px] text-ink-2">Want to remove everything? This cannot be undone.</p>
+              <Button
+                variant="danger"
+                size="sm"
+                icon={TrashIcon}
+                onClick={() => setShowDeleteConfirm(true)}
+                fullWidth
+              >
                 Delete all my data
               </Button>
             </div>
@@ -94,7 +88,7 @@ const PrivacyNotice = () => {
       </Modal>
 
       <Modal
-        isOpen={showDeleteConfirm}
+        isOpen={Boolean(isOpen) && showDeleteConfirm}
         onClose={() => setShowDeleteConfirm(false)}
         title="Delete all your data?"
         size="sm"
@@ -137,4 +131,4 @@ const PrivacyNotice = () => {
   );
 };
 
-export default PrivacyNotice;
+export default PrivacyDialog;

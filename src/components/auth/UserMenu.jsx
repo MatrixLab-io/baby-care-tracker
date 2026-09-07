@@ -1,11 +1,17 @@
 import { useState, useRef, useEffect } from 'react';
-import { ArrowRightStartOnRectangleIcon, ChevronDownIcon } from '@heroicons/react/24/outline';
+import {
+  ArrowRightStartOnRectangleIcon,
+  ChevronDownIcon,
+  ShieldCheckIcon,
+} from '@heroicons/react/24/outline';
 import { useAuth } from '../../context/AuthContext';
 import Avatar from '../ui/Avatar';
+import PrivacyDialog from '../PrivacyDialog';
 
 const UserMenu = () => {
   const { user, signOut } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
+  const [privacyOpen, setPrivacyOpen] = useState(false);
   const menuRef = useRef(null);
 
   useEffect(() => {
@@ -24,6 +30,11 @@ const UserMenu = () => {
     } catch (error) {
       console.error('Sign out error:', error);
     }
+  };
+
+  const openPrivacy = () => {
+    setIsOpen(false);
+    setPrivacyOpen(true);
   };
 
   if (!user) return null;
@@ -48,17 +59,27 @@ const UserMenu = () => {
       </button>
 
       {isOpen && (
-        <div className="menu absolute right-0 mt-2 w-56 z-50" role="menu">
+        <div className="menu absolute right-0 mt-2 w-60 z-50" role="menu">
           <div className="px-3 py-2.5 border-b border-line">
             <p className="text-sm font-semibold text-ink truncate">{displayName}</p>
             <p className="text-xs text-ink-2 truncate">{user.email}</p>
           </div>
+
+          {/* Your data and how to delete it sit under the account, not beside
+              the theme toggle. */}
+          <button type="button" onClick={openPrivacy} className="menu-item" role="menuitem">
+            <ShieldCheckIcon className="w-[18px] h-[18px]" aria-hidden="true" />
+            Data privacy
+          </button>
+
           <button type="button" onClick={handleSignOut} className="menu-item menu-item-danger" role="menuitem">
             <ArrowRightStartOnRectangleIcon className="w-[18px] h-[18px]" aria-hidden="true" />
             Sign out
           </button>
         </div>
       )}
+
+      <PrivacyDialog isOpen={privacyOpen} onClose={() => setPrivacyOpen(false)} />
     </div>
   );
 };
