@@ -1,0 +1,226 @@
+/* ==========================================================================
+   Component classes. Thin, token-driven. Layout stays in JSX utilities.
+   Adding a page should need nothing new here.
+   ========================================================================== */
+
+@layer components {
+  /* --- Page frame --------------------------------------------------------- */
+  .page {
+    @apply mx-auto w-full max-w-[1200px] px-4 sm:px-6 lg:px-8;
+  }
+  .section {
+    @apply py-12 sm:py-16;
+  }
+  .eyebrow {
+    @apply text-sm font-semibold text-ink-2;
+  }
+
+  /* --- App header: one flat bar, sticky, full width ---------------------- */
+  .app-header {
+    @apply sticky top-0 z-40 bg-surface border-b border-line;
+  }
+  .app-header-bar {
+    @apply mx-auto w-full max-w-[1200px] px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-3;
+  }
+
+  /* --- Surfaces ----------------------------------------------------------- */
+  .card {
+    @apply bg-surface border border-line rounded-card shadow-card;
+  }
+  .card-lift {
+    @apply transition-[translate,box-shadow,border-color,background-color] duration-300 ease-[cubic-bezier(0.2,0.7,0.2,1)] will-change-[translate,box-shadow];
+  }
+  .card-lift:hover {
+    @apply -translate-y-0.5 shadow-lift border-line-strong;
+  }
+  .card-inverse {
+    @apply bg-surface-inverse text-ink-inverse border-surface-inverse;
+  }
+
+  /* --- Buttons ------------------------------------------------------------ */
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 h-10 px-[18px] rounded-control text-sm font-semibold whitespace-nowrap select-none cursor-pointer transition-colors duration-150 disabled:opacity-60 disabled:cursor-not-allowed;
+  }
+  .btn-sm {
+    @apply h-9 px-4;
+  }
+  .btn-lg {
+    @apply h-12 px-6 text-[15px];
+  }
+  .btn-primary {
+    @apply bg-surface-inverse text-ink-inverse shadow-button hover:bg-black dark:hover:bg-neutral-200;
+  }
+  .btn-secondary {
+    @apply bg-surface text-ink border border-line-strong hover:bg-surface-2;
+  }
+  .btn-accent {
+    @apply bg-accent text-white hover:bg-accent-strong;
+  }
+  .btn-plain {
+    @apply text-link hover:text-link-hover px-0 h-auto;
+  }
+  /* Destructive action. Quiet until hovered: deleting is never the happy path. */
+  .btn-danger {
+    @apply bg-surface text-danger-fg border border-danger-fg/30 hover:bg-danger-bg;
+  }
+  /* Buttons that sit on .card-inverse: they follow the flipped surface in both themes */
+  .btn-on-inverse {
+    @apply bg-surface text-ink hover:bg-surface-2;
+  }
+  .btn-outline-on-inverse {
+    @apply bg-transparent text-ink-inverse border border-ink-inverse-2 hover:bg-ink-inverse/10;
+  }
+
+  /* --- Badges ------------------------------------------------------------- */
+  .badge {
+    @apply inline-flex items-center h-5 px-2 rounded-full text-xs font-medium leading-5 whitespace-nowrap;
+  }
+  .badge-live { @apply bg-live-bg text-live-fg; }
+  .badge-soon { @apply bg-soon-bg text-soon-fg; }
+  .badge-new { @apply bg-new-bg text-new-fg; }
+  .badge-neutral { @apply bg-neutral-bg text-neutral-fg; }
+  .badge-accent { @apply bg-accent-soft text-accent-soft-fg; }
+  .badge-inverse { @apply bg-surface-inverse text-ink-inverse; }
+  .badge-danger { @apply bg-danger-bg text-danger-fg; }
+
+  /* --- Chips (selectable pills) ------------------------------------------- */
+  .chip {
+    @apply inline-flex items-center gap-1.5 h-[34px] px-3.5 rounded-full border border-line-strong bg-surface text-sm font-medium text-ink cursor-pointer transition-colors duration-150 hover:bg-surface-2;
+  }
+  .chip-on {
+    @apply bg-surface-inverse text-ink-inverse border-surface-inverse hover:bg-surface-inverse;
+  }
+  .chip-filter {
+    @apply h-7 px-3 text-[13px] border-transparent bg-neutral-bg text-neutral-fg;
+  }
+  .chip-filter.chip-on {
+    @apply bg-surface-inverse text-ink-inverse;
+  }
+
+  /* --- Forms -------------------------------------------------------------- */
+  .label {
+    @apply block text-[13px] font-semibold text-ink mb-2;
+  }
+  .help {
+    @apply text-xs text-ink-2 mt-1.5;
+  }
+  .input {
+    @apply w-full h-10 px-3 rounded-control bg-surface border border-line-strong text-sm text-ink placeholder:text-ink-3 transition-[border-color,box-shadow] duration-150 focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/30;
+  }
+  .input-area {
+    @apply h-auto py-2.5 leading-relaxed resize-none;
+  }
+  .input-error {
+    @apply border-danger-fg focus:border-danger-fg focus:ring-danger-fg/20;
+  }
+
+  /* --- Icon tile (service / product icon well) ---------------------------- */
+  .icon-tile {
+    @apply flex items-center justify-center rounded-tile bg-ground text-ink transition-[background-color,color,scale] duration-300 ease-[cubic-bezier(0.2,0.7,0.2,1)];
+  }
+
+  /* --- Long-form text (legal pages, docs) --------------------------------- */
+  .prose {
+    @apply text-[15px] leading-relaxed text-ink;
+  }
+  .prose p + p,
+  .prose section + section,
+  .prose p + section {
+    @apply mt-4;
+  }
+  .prose section + section {
+    @apply mt-8;
+  }
+  .prose h2 {
+    @apply text-lg font-semibold mb-3 scroll-mt-24;
+  }
+  .prose a {
+    @apply underline underline-offset-2;
+  }
+
+  /* --- Table-ish rows ----------------------------------------------------- */
+  .row-divider > * + * {
+    @apply border-t border-line-soft;
+  }
+
+  /* --- Tabs --------------------------------------------------------------- */
+  .tabs {
+    @apply inline-flex gap-1 p-1 rounded-control bg-surface-2 border border-line min-w-max;
+  }
+  .tab {
+    @apply inline-flex items-center justify-center gap-2 h-9 px-3 sm:px-4 rounded-[6px] text-sm font-medium text-ink-2 whitespace-nowrap cursor-pointer transition-colors duration-150 hover:text-ink focus:outline-none;
+  }
+  .tab-on {
+    @apply bg-surface text-ink shadow-card;
+  }
+
+  /* --- Avatar ------------------------------------------------------------- */
+  .avatar {
+    @apply rounded-full object-cover bg-accent-soft text-accent-soft-fg border border-line flex items-center justify-center font-semibold shrink-0 overflow-hidden;
+  }
+
+  /* --- Meter (vaccine progress) ------------------------------------------- */
+  .meter {
+    @apply w-full h-2 rounded-full bg-surface-2 border border-line overflow-hidden;
+  }
+  .meter-fill {
+    @apply h-full rounded-full bg-accent transition-[width] duration-700 ease-out;
+  }
+
+  /* --- Menu (user menu, popovers) ----------------------------------------- */
+  .menu {
+    @apply bg-surface border border-line rounded-card shadow-lift py-1;
+  }
+  .menu-item {
+    @apply w-full flex items-center gap-2 px-3 py-2 text-sm text-ink text-left cursor-pointer hover:bg-surface-2;
+  }
+  .menu-item-danger {
+    @apply text-danger-fg hover:bg-danger-bg;
+  }
+
+  /* --- Modal -------------------------------------------------------------- */
+  .modal-backdrop {
+    @apply fixed inset-0 bg-black/40 backdrop-blur-[2px];
+  }
+  .modal-panel {
+    @apply relative w-full bg-surface border border-line rounded-card shadow-modal;
+  }
+
+  /* --- File dropzone ------------------------------------------------------ */
+  .dropzone {
+    @apply w-full flex flex-col items-center justify-center gap-2 p-6 rounded-control border border-dashed border-line-strong bg-surface-2 text-ink-2 cursor-pointer transition-colors duration-150 hover:border-accent hover:text-ink;
+  }
+
+  /* --- Data table --------------------------------------------------------- */
+  .table {
+    @apply w-full text-sm border-collapse;
+  }
+  .table thead th {
+    @apply bg-surface-2 text-[13px] font-semibold text-ink-2 text-left px-4 py-2.5 border-b border-line whitespace-nowrap;
+  }
+  .table tbody td {
+    @apply px-4 py-3 text-ink border-b border-line-soft;
+  }
+  .table tbody tr:last-child td {
+    @apply border-b-0;
+  }
+
+  /* --- Icon-only button --------------------------------------------------- */
+  .btn-icon {
+    @apply inline-flex items-center justify-center w-9 h-9 rounded-control text-ink-2 cursor-pointer transition-colors duration-150 hover:bg-surface-2 hover:text-ink;
+  }
+  .btn-icon-danger {
+    @apply hover:bg-danger-bg hover:text-danger-fg;
+  }
+
+  /* --- Stat (age, counts) ------------------------------------------------- */
+  .stat {
+    @apply rounded-control border border-line bg-surface-2 px-3 py-2;
+  }
+  .stat-label {
+    @apply text-xs font-medium text-ink-2;
+  }
+  .stat-value {
+    @apply text-[15px] font-semibold text-ink;
+  }
+}

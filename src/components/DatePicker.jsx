@@ -1,14 +1,21 @@
 import { useEffect, useRef } from 'react';
 import flatpickr from 'flatpickr';
-import 'flatpickr/dist/flatpickr.min.css';
+import { CalendarDaysIcon } from '@heroicons/react/24/outline';
+import FormField from './ui/FormField';
 
+/**
+ * flatpickr behind the design system's `.input`. The calendar itself is
+ * repainted with tokens in src/styles/flatpickr.css.
+ */
 const DatePicker = ({
   label,
+  name,
   value,
   onChange,
   placeholder = 'Select date',
   required = false,
   error = '',
+  help = '',
   className = '',
   maxDate = null,
   minDate = null,
@@ -16,37 +23,27 @@ const DatePicker = ({
 }) => {
   const inputRef = useRef(null);
   const flatpickrRef = useRef(null);
+  const onChangeRef = useRef(onChange);
+  onChangeRef.current = onChange;
 
   useEffect(() => {
-    if (inputRef.current) {
-      flatpickrRef.current = flatpickr(inputRef.current, {
-        dateFormat: 'Y-m-d',
-        maxDate: maxDate || new Date(),
-        minDate: minDate,
-        defaultDate: value || null,
-        disableMobile: true,
-        onChange: (selectedDates, dateStr) => {
-          if (onChange) {
-            // Create synthetic event
-            const event = {
-              target: {
-                value: dateStr,
-                name: props.name || 'date'
-              }
-            };
-            onChange(event);
-          }
-        },
-        theme: 'light'
-      });
-    }
+    if (!inputRef.current) return undefined;
+
+    flatpickrRef.current = flatpickr(inputRef.current, {
+      dateFormat: 'Y-m-d',
+      maxDate: maxDate || new Date(),
+      minDate,
+      defaultDate: value || null,
+      disableMobile: true,
+      onChange: (selectedDates, dateStr) => {
+        onChangeRef.current?.({ target: { value: dateStr, name: name || 'date' } });
+      },
+    });
 
     return () => {
-      if (flatpickrRef.current) {
-        flatpickrRef.current.destroy();
-      }
+      flatpickrRef.current?.destroy();
     };
-  }, [maxDate, minDate]);
+  }, [maxDate, minDate, name]);
 
   useEffect(() => {
     if (flatpickrRef.current && value) {
@@ -54,29 +51,35 @@ const DatePicker = ({
     }
   }, [value]);
 
+  const id = name || 'date';
+
   return (
-    <div className={`mb-4 ${className}`}>
-      {label && (
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-          {label}
-          {required && <span className="text-red-500 ml-1">*</span>}
-        </label>
-      )}
-      <input
-        ref={inputRef}
-        type="text"
-        placeholder={placeholder}
-        required={required}
-        className={`glass-card border border-white/10 w-full px-4 py-3 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 cursor-pointer ${
-          error ? 'ring-2 ring-red-500' : ''
-        }`}
-        readOnly
-        {...props}
-      />
-      {error && (
-        <p className="mt-1 text-sm text-red-500">{error}</p>
-      )}
-    </div>
+    <FormField
+      label={label}
+      required={required}
+      error={error}
+      help={help}
+      htmlFor={id}
+      className={className}
+    >
+      <div className="relative">
+        <input
+          ref={inputRef}
+          id={id}
+          name={name}
+          type="text"
+          placeholder={placeholder}
+          required={required}
+          readOnly
+          className={`input pr-10 cursor-pointer ${error ? 'input-error' : ''}`}
+          {...props}
+        />
+        <CalendarDaysIcon
+          className="w-[18px] h-[18px] text-ink-3 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none"
+          aria-hidden="true"
+        />
+      </div>
+    </FormField>
   );
 };
 

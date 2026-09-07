@@ -19,7 +19,7 @@ A production-ready Progressive Web App (PWA) for tracking baby's age, vaccines, 
 - **Medical Records**: Upload and store medical documents (PDF, images) - 5MB total, 500KB per file
 - **Progress Tracking**: Visual progress bar showing vaccination completion
 - **Shareable Links**: Generate read-only links to share baby's vaccine schedule
-- **Dark Mode**: Elegant dark/light mode toggle with glassmorphism design
+- **Dark Mode**: Light and dark themes from one set of design tokens, following the OS by default
 - **PWA Support**: Install as app on mobile/desktop with offline support
 - **Auto Updates**: Get notified when a new version is available
 
@@ -46,7 +46,7 @@ A production-ready Progressive Web App (PWA) for tracking baby's age, vaccines, 
 |------------|---------|---------|
 | React | 19 | UI Framework |
 | Vite | 7 | Build Tool |
-| Tailwind CSS | 4 | Styling (glassmorphism effects) |
+| Tailwind CSS | 4 | Styling (MatrixLab design system tokens) |
 | Firebase | 12 | Authentication & Firestore Database |
 | React Router DOM | 7 | Routing |
 | Heroicons | 2 | Icons |

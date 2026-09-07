@@ -22,13 +22,14 @@
     <meta name="twitter:image" content="https://mybabycare.netlify.app/og-image.png" />
 
     <!-- PWA Meta Tags -->
-    <meta name="theme-color" content="#6366f1" />
+    <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#141414" media="(prefers-color-scheme: dark)" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="MyBabyCare" />
     <meta name="application-name" content="MyBabyCare" />
-    <meta name="msapplication-TileColor" content="#6366f1" />
+    <meta name="msapplication-TileColor" content="#0d9488" />
     <meta name="msapplication-tap-highlight" content="no" />
     <meta name="format-detection" content="telephone=no" />
 
@@ -40,46 +41,56 @@
     <link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-192x192.png" />
     <link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-192x192.png" />
 
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=Sora:wght@700&display=swap" rel="stylesheet" />
+
     <!-- PWA Manifest -->
     <link rel="manifest" href="/manifest.json" />
 
     <title>MyBabyCare - Baby Care & Vaccine Tracker</title>
 
     <script>
-      // Ensure dark mode by default
-      const theme = localStorage.getItem('theme');
-      if (theme !== 'light') {
+      // Saved choice wins; otherwise follow the OS. Runs before paint so the
+      // first frame is already the right theme.
+      const saved = localStorage.getItem('theme');
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      if (saved === 'dark' || (!saved && prefersDark)) {
         document.documentElement.classList.add('dark');
       }
     </script>
     <style>
+      /* Loader paints before the stylesheet lands, so the two ground values
+         are inlined here. They match --ml-ground in tokens.css. */
       #app-loader {
         position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: #0f172a;
+        inset: 0;
+        background: #f1f1f1;
         display: flex;
         align-items: center;
         justify-content: center;
         z-index: 9999;
         transition: opacity 0.3s ease-out;
       }
-      html:not(.dark) #app-loader {
-        background: #f1f5f9;
+      html.dark #app-loader {
+        background: #141414;
       }
       #app-loader.hidden {
         opacity: 0;
         pointer-events: none;
       }
       .spinner {
-        width: 40px;
-        height: 40px;
-        border: 3px solid rgba(99, 102, 241, 0.3);
-        border-top-color: #6366f1;
+        width: 32px;
+        height: 32px;
+        border: 2px solid rgba(13, 148, 136, 0.25);
+        border-top-color: #0d9488;
         border-radius: 50%;
         animation: spin 0.8s linear infinite;
+      }
+      html.dark .spinner {
+        border-color: rgba(45, 212, 191, 0.25);
+        border-top-color: #2dd4bf;
       }
       @keyframes spin {
         to { transform: rotate(360deg); }

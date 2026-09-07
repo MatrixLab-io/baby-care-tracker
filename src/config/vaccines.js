@@ -1,3 +1,10 @@
+import {
+  CalendarDaysIcon,
+  CheckCircleIcon,
+  ClockIcon,
+  ExclamationTriangleIcon
+} from '@heroicons/react/24/outline';
+
 // Bangladesh EPI Vaccine Schedule
 // Note: Bangladesh EPI uses day 45 for first dose (6 weeks), with 28-day intervals for subsequent doses
 export const BD_EPI_SCHEDULE = [
@@ -59,18 +66,19 @@ export const VACCINE_STATUS = {
   OVERDUE: 'overdue'
 };
 
-// Status colors
-export const STATUS_COLORS = {
-  [VACCINE_STATUS.COMPLETED]: 'text-green-600 bg-green-50',
-  [VACCINE_STATUS.DUE]: 'text-orange-600 bg-orange-50',
-  [VACCINE_STATUS.UPCOMING]: 'text-blue-600 bg-blue-50',
-  [VACCINE_STATUS.OVERDUE]: 'text-red-600 bg-red-50'
+// Status presentation. Tones map onto the design system's badge classes, so a
+// status never invents a colour of its own.
+export const STATUS_TONES = {
+  [VACCINE_STATUS.COMPLETED]: 'live',
+  [VACCINE_STATUS.DUE]: 'new',
+  [VACCINE_STATUS.UPCOMING]: 'soon',
+  [VACCINE_STATUS.OVERDUE]: 'danger'
 };
 
-// Status icons
+// Heroicons outline, never emoji.
 export const STATUS_ICONS = {
-  [VACCINE_STATUS.COMPLETED]: '✅',
-  [VACCINE_STATUS.DUE]: '⏳',
-  [VACCINE_STATUS.UPCOMING]: '🔵',
-  [VACCINE_STATUS.OVERDUE]: '⚠️'
+  [VACCINE_STATUS.COMPLETED]: CheckCircleIcon,
+  [VACCINE_STATUS.DUE]: ClockIcon,
+  [VACCINE_STATUS.UPCOMING]: CalendarDaysIcon,
+  [VACCINE_STATUS.OVERDUE]: ExclamationTriangleIcon
 };

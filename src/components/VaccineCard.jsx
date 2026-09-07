@@ -1,68 +1,53 @@
-import { CheckCircleIcon, ClockIcon, ArrowPathIcon } from '@heroicons/react/24/outline';
-import { STATUS_COLORS, STATUS_ICONS } from '../config/vaccines';
-import Button from './Button';
+import { ArrowPathIcon, ArrowUturnLeftIcon, CheckIcon } from '@heroicons/react/24/outline';
+import { STATUS_ICONS, STATUS_TONES, VACCINE_STATUS } from '../config/vaccines';
+import Badge from './ui/Badge';
+import Button from './ui/Button';
 
-const VaccineCard = ({ vaccine, onToggle, isLoading = false }) => {
+// Written out rather than composed, so Tailwind can see every class it emits.
+const WELL_CLASSES = {
+  [VACCINE_STATUS.COMPLETED]: 'bg-live-bg text-live-fg',
+  [VACCINE_STATUS.DUE]: 'bg-new-bg text-new-fg',
+  [VACCINE_STATUS.UPCOMING]: 'bg-soon-bg text-soon-fg',
+  [VACCINE_STATUS.OVERDUE]: 'bg-danger-bg text-danger-fg',
+};
+
+const VaccineCard = ({ vaccine, onToggle, isLoading = false, readOnly = false }) => {
   const { label, dueDate, status, statusMessage, isCompleted, ageLabel, ageDays } = vaccine;
+  const StatusIcon = STATUS_ICONS[status];
 
   return (
-    <div className={`glass-card border border-white/10 border-l-4 p-4 sm:p-5 rounded-r-2xl transition-all hover:scale-[1.01] ${
-      isCompleted ? 'border-l-green-500' : 'border-l-indigo-500'
-    } ${isLoading ? 'opacity-70' : ''}`}>
-      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 sm:gap-3 mb-2">
-            <span className="text-2xl sm:text-3xl">{STATUS_ICONS[status]}</span>
-            <h3 className="font-semibold text-gray-900 dark:text-gray-100 text-base sm:text-lg">{label}</h3>
-          </div>
+    <div className={`p-4 flex flex-col sm:flex-row sm:items-start gap-3 sm:gap-4 ${isLoading ? 'opacity-60' : ''}`}>
+      <span className={`icon-tile w-10 h-10 shrink-0 ${WELL_CLASSES[status]}`}>
+        <StatusIcon className="w-5 h-5" aria-hidden="true" />
+      </span>
 
-          <div className="mb-3">
-            <span className="inline-flex items-center gap-2 text-xs flex-wrap">
-              <span className="px-2 py-1 rounded-md bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300 font-medium">
-                {ageLabel}
-              </span>
-              <span className="px-2 py-1 rounded-md bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300">
-                {ageDays}
-              </span>
-            </span>
-          </div>
+      <div className="flex-1 min-w-0">
+        <h3 className="text-[15px] font-semibold text-ink">{label}</h3>
 
-          <div className="space-y-2">
-            <p className="text-sm text-gray-600 dark:text-gray-400">
-              <span className="font-medium">Due Date:</span> {dueDate}
-            </p>
-            <p className={`text-sm font-medium inline-block px-3 py-1.5 rounded-lg ${STATUS_COLORS[status]}`}>
-              {statusMessage}
-            </p>
-          </div>
+        <div className="flex flex-wrap items-center gap-1.5 mt-2">
+          <Badge tone="accent">{ageLabel}</Badge>
+          <Badge tone="neutral">{ageDays}</Badge>
+          <Badge tone={STATUS_TONES[status]}>{statusMessage}</Badge>
         </div>
 
-        <div className="shrink-0">
-          {isCompleted ? (
-            <Button
-              size="sm"
-              variant="secondary"
-              icon={isLoading ? ArrowPathIcon : ClockIcon}
-              onClick={() => onToggle(vaccine.key)}
-              disabled={isLoading}
-              className={isLoading ? '[&>svg]:animate-spin' : ''}
-            >
-              {isLoading ? 'Updating...' : 'Undo'}
-            </Button>
-          ) : (
-            <Button
-              size="sm"
-              variant="success"
-              icon={isLoading ? ArrowPathIcon : CheckCircleIcon}
-              onClick={() => onToggle(vaccine.key)}
-              disabled={isLoading}
-              className={isLoading ? '[&>svg]:animate-spin' : ''}
-            >
-              {isLoading ? 'Updating...' : 'Mark Done'}
-            </Button>
-          )}
-        </div>
+        <p className="text-[13px] text-ink-2 mt-2">
+          Due <span className="font-medium text-ink">{dueDate}</span>
+        </p>
       </div>
+
+      {!readOnly && (
+        <div className="shrink-0">
+          <Button
+            variant={isCompleted ? 'secondary' : 'accent'}
+            size="sm"
+            icon={isLoading ? ArrowPathIcon : isCompleted ? ArrowUturnLeftIcon : CheckIcon}
+            loading={isLoading}
+            onClick={() => onToggle(vaccine.key)}
+          >
+            {isLoading ? 'Updating' : isCompleted ? 'Undo' : 'Mark done'}
+          </Button>
+        </div>
+      )}
     </div>
   );
 };

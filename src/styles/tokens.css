@@ -1,0 +1,166 @@
+/* ==========================================================================
+   MyBabyCare design tokens — MatrixLab design system
+   Polaris-style neutrals, one teal accent, status tones, brand colours.
+   Raw values live on :root / .dark. Tailwind reads them through @theme inline,
+   so `bg-surface`, `text-ink-2`, `border-line`, `rounded-card` … all follow
+   the active theme.
+   ========================================================================== */
+
+:root {
+  --ml-ground: #f1f1f1;
+  --ml-surface: #ffffff;
+  --ml-surface-2: #f7f7f7;
+  --ml-surface-inverse: #303030;
+
+  --ml-ink: #303030;
+  --ml-ink-2: #616161;
+  --ml-ink-3: #8a8a8a;
+  --ml-ink-inverse: #ffffff;
+  --ml-ink-inverse-2: #b5b5b5;
+
+  --ml-line: #e3e3e3;
+  --ml-line-soft: #ebebeb;
+  --ml-line-strong: #c9cccf;
+
+  --ml-accent: #0d9488;
+  --ml-accent-strong: #0f766e;
+  --ml-accent-soft: #ccfbf1;
+  --ml-accent-soft-fg: #134e4a;
+  --ml-accent-tint: #ecfdf5;
+
+  --ml-link: #005bd3;
+  --ml-link-hover: #004299;
+
+  --ml-live-bg: #cdfee1;
+  --ml-live-fg: #0c5132;
+  --ml-soon-bg: #e0f0ff;
+  --ml-soon-fg: #00527c;
+  --ml-new-bg: #ffd6a4;
+  --ml-new-fg: #5e4200;
+  --ml-neutral-bg: #e3e3e3;
+  --ml-neutral-fg: #303030;
+  --ml-danger-bg: #fee2e2;
+  --ml-danger-fg: #991b1b;
+
+  --ml-shadow-card: 0 1px 0 rgba(26, 26, 26, 0.07);
+  --ml-shadow-lift: 0 8px 24px rgba(26, 26, 26, 0.08);
+  --ml-shadow-button: inset 0 -1px 0 rgba(0, 0, 0, 0.6);
+  --ml-shadow-modal: 0 24px 64px rgba(26, 26, 26, 0.18);
+
+  /* Growth chart series. Deliberately not the accent: three series must be
+     told apart, and the accent stays the single brand highlight. */
+  --ml-series-1: #005bd3;
+  --ml-series-2: #0d9488;
+  --ml-series-3: #b45309;
+
+  --nav-height: 4rem; /* 64px header bar */
+  color-scheme: light;
+}
+
+.dark {
+  --ml-ground: #141414;
+  --ml-surface: #1f1f1f;
+  --ml-surface-2: #262626;
+  --ml-surface-inverse: #ffffff;
+
+  --ml-ink: #f1f1f1;
+  --ml-ink-2: #b5b5b5;
+  --ml-ink-3: #8a8a8a;
+  --ml-ink-inverse: #1a1a1a;
+  --ml-ink-inverse-2: #616161;
+
+  --ml-line: #303030;
+  --ml-line-soft: #2a2a2a;
+  --ml-line-strong: #4a4a4a;
+
+  --ml-accent: #2dd4bf;
+  --ml-accent-strong: #5eead4;
+  --ml-accent-soft: #134e4a;
+  --ml-accent-soft-fg: #99f6e4;
+  --ml-accent-tint: #0f2f2b;
+
+  --ml-link: #7cb4ff;
+  --ml-link-hover: #a8ccff;
+
+  --ml-live-bg: #0c5132;
+  --ml-live-fg: #cdfee1;
+  --ml-soon-bg: #00527c;
+  --ml-soon-fg: #e0f0ff;
+  --ml-new-bg: #5e4200;
+  --ml-new-fg: #ffd6a4;
+  --ml-neutral-bg: #303030;
+  --ml-neutral-fg: #f1f1f1;
+  --ml-danger-bg: #450a0a;
+  --ml-danger-fg: #fecaca;
+
+  --ml-shadow-card: 0 1px 0 rgba(0, 0, 0, 0.5);
+  --ml-shadow-lift: 0 8px 24px rgba(0, 0, 0, 0.4);
+  --ml-shadow-button: inset 0 -1px 0 rgba(0, 0, 0, 0.8);
+  --ml-shadow-modal: 0 24px 64px rgba(0, 0, 0, 0.6);
+
+  --ml-series-1: #7cb4ff;
+  --ml-series-2: #2dd4bf;
+  --ml-series-3: #fbbf24;
+
+  color-scheme: dark;
+}
+
+@theme inline {
+  /* Semantic colours */
+  --color-ground: var(--ml-ground);
+  --color-surface: var(--ml-surface);
+  --color-surface-2: var(--ml-surface-2);
+  --color-surface-inverse: var(--ml-surface-inverse);
+
+  --color-ink: var(--ml-ink);
+  --color-ink-2: var(--ml-ink-2);
+  --color-ink-3: var(--ml-ink-3);
+  --color-ink-inverse: var(--ml-ink-inverse);
+  --color-ink-inverse-2: var(--ml-ink-inverse-2);
+
+  --color-line: var(--ml-line);
+  --color-line-soft: var(--ml-line-soft);
+  --color-line-strong: var(--ml-line-strong);
+
+  --color-accent: var(--ml-accent);
+  --color-accent-strong: var(--ml-accent-strong);
+  --color-accent-soft: var(--ml-accent-soft);
+  --color-accent-soft-fg: var(--ml-accent-soft-fg);
+  --color-accent-tint: var(--ml-accent-tint);
+
+  --color-link: var(--ml-link);
+  --color-link-hover: var(--ml-link-hover);
+
+  --color-live-bg: var(--ml-live-bg);
+  --color-live-fg: var(--ml-live-fg);
+  --color-soon-bg: var(--ml-soon-bg);
+  --color-soon-fg: var(--ml-soon-fg);
+  --color-new-bg: var(--ml-new-bg);
+  --color-new-fg: var(--ml-new-fg);
+  --color-neutral-bg: var(--ml-neutral-bg);
+  --color-neutral-fg: var(--ml-neutral-fg);
+  --color-danger-bg: var(--ml-danger-bg);
+  --color-danger-fg: var(--ml-danger-fg);
+
+  --color-series-1: var(--ml-series-1);
+  --color-series-2: var(--ml-series-2);
+  --color-series-3: var(--ml-series-3);
+
+  /* Fixed brand colours (never themed) */
+  --color-google-blue: #4285f4;
+
+  /* Type */
+  --font-sans: 'Instrument Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, sans-serif;
+  --font-brand: 'Sora', 'Instrument Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+
+  /* Shape */
+  --radius-card: 12px;
+  --radius-control: 8px;
+  --radius-tile: 10px;
+
+  /* Elevation */
+  --shadow-card: var(--ml-shadow-card);
+  --shadow-lift: var(--ml-shadow-lift);
+  --shadow-button: var(--ml-shadow-button);
+  --shadow-modal: var(--ml-shadow-modal);
+}

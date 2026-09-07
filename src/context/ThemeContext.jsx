@@ -10,31 +10,23 @@ export const useTheme = () => {
   return context;
 };
 
+// Same rule as the pre-paint script in index.html: a saved choice wins,
+// otherwise follow the OS.
+const initialIsDark = () => {
+  const saved = localStorage.getItem('theme');
+  if (saved) return saved === 'dark';
+  return window.matchMedia('(prefers-color-scheme: dark)').matches;
+};
+
 export const ThemeProvider = ({ children }) => {
-  const [isDark, setIsDark] = useState(() => {
-    const saved = localStorage.getItem('theme');
-    // Default to dark mode if nothing saved
-    if (!saved) return true;
-    return saved === 'dark';
-  });
+  const [isDark, setIsDark] = useState(initialIsDark);
 
   useEffect(() => {
-    const root = document.documentElement;
-
-    if (isDark) {
-      root.classList.add('dark');
-      localStorage.setItem('theme', 'dark');
-    } else {
-      root.classList.remove('dark');
-      localStorage.setItem('theme', 'light');
-    }
+    document.documentElement.classList.toggle('dark', isDark);
+    localStorage.setItem('theme', isDark ? 'dark' : 'light');
   }, [isDark]);
 
-  const toggleTheme = () => setIsDark(!isDark);
+  const toggleTheme = () => setIsDark((prev) => !prev);
 
-  return (
-    <ThemeContext.Provider value={{ isDark, toggleTheme }}>
-      {children}
-    </ThemeContext.Provider>
-  );
+  return <ThemeContext.Provider value={{ isDark, toggleTheme }}>{children}</ThemeContext.Provider>;
 };

@@ -1,118 +1,128 @@
 import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  ShareIcon,
-  TrophyIcon,
-  ChartBarIcon,
-  DocumentTextIcon,
-  DocumentIcon,
-  TrashIcon,
   ArrowDownTrayIcon,
   ArrowLeftIcon,
-  EyeIcon
+  ChartBarIcon,
+  CheckIcon,
+  DocumentIcon,
+  DocumentTextIcon,
+  ExclamationTriangleIcon,
+  EyeIcon,
+  ShareIcon,
+  ShieldCheckIcon,
+  TrashIcon,
+  TrophyIcon,
 } from '@heroicons/react/24/outline';
 import { useBaby } from '../context/BabyContext';
 import { calculateAge } from '../utils/ageCalculator';
-import { getVaccineStatus, getVaccineProgress, getVaccinationStage, getOverdueVaccines } from '../utils/vaccineEngine';
-import Card from '../components/Card';
-import Button from '../components/Button';
-import VaccineCard from '../components/VaccineCard';
+import {
+  getVaccineStatus,
+  getVaccineProgress,
+  getVaccinationStage,
+  getOverdueVaccines,
+} from '../utils/vaccineEngine';
+import AppShell from '../components/AppShell';
+import { CardLoader } from '../components/LoadingCard';
 import ProgressBar from '../components/ProgressBar';
+import VaccineCard from '../components/VaccineCard';
 import MilestoneTracker from '../components/MilestoneTracker';
 import GrowthTracker from '../components/GrowthTracker';
-import Header from '../components/Header';
-import { CardLoader } from '../components/LoadingCard';
-import Footer from '../components/Footer';
+import Avatar from '../components/ui/Avatar';
+import Badge from '../components/ui/Badge';
+import Button from '../components/ui/Button';
+import Card from '../components/ui/Card';
+import ChipSelect from '../components/ui/ChipSelect';
+import EmptyState from '../components/ui/EmptyState';
+import SectionHeader from '../components/ui/SectionHeader';
 
 const TABS = [
-  { id: 'vaccines', label: 'Vaccines', icon: null, emoji: '💉' },
+  { id: 'vaccines', label: 'Vaccines', icon: ShieldCheckIcon },
   { id: 'milestones', label: 'Milestones', icon: TrophyIcon },
   { id: 'growth', label: 'Growth', icon: ChartBarIcon },
-  { id: 'records', label: 'Records', icon: DocumentTextIcon }
+  { id: 'records', label: 'Records', icon: DocumentTextIcon },
 ];
+
+const GENDER_LABELS = { male: 'Boy', female: 'Girl' };
+
+const formatFileSize = (bytes) => {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+};
 
 const Dashboard = () => {
   const navigate = useNavigate();
   const { currentBaby, babies, switchBaby, toggleVaccineStatus, deleteMedicalRecord, loading } = useBaby();
   const [activeTab, setActiveTab] = useState('vaccines');
   const [loadingVaccineKey, setLoadingVaccineKey] = useState(null);
+  const [shareCopied, setShareCopied] = useState(false);
   const tabsContainerRef = useRef(null);
   const tabRefs = useRef({});
 
   const handleTabClick = (tabId) => {
     setActiveTab(tabId);
 
-    // Auto-scroll to show the clicked tab
     const tabElement = tabRefs.current[tabId];
     const container = tabsContainerRef.current;
+    if (!tabElement || !container) return;
 
-    if (tabElement && container) {
-      const tabIndex = TABS.findIndex(t => t.id === tabId);
-
-      if (tabIndex === 0) {
-        // First tab - scroll to start
-        container.scrollTo({ left: 0, behavior: 'smooth' });
-      } else if (tabIndex === TABS.length - 1) {
-        // Last tab - scroll to end
-        container.scrollTo({ left: container.scrollWidth, behavior: 'smooth' });
-      } else {
-        // Middle tabs - center the tab
-        const containerRect = container.getBoundingClientRect();
-        const tabRect = tabElement.getBoundingClientRect();
-        const scrollLeft = tabElement.offsetLeft - (containerRect.width / 2) + (tabRect.width / 2);
-        container.scrollTo({ left: scrollLeft, behavior: 'smooth' });
-      }
+    const tabIndex = TABS.findIndex((t) => t.id === tabId);
+    if (tabIndex === 0) {
+      container.scrollTo({ left: 0, behavior: 'smooth' });
+    } else if (tabIndex === TABS.length - 1) {
+      container.scrollTo({ left: container.scrollWidth, behavior: 'smooth' });
+    } else {
+      const containerRect = container.getBoundingClientRect();
+      const tabRect = tabElement.getBoundingClientRect();
+      container.scrollTo({
+        left: tabElement.offsetLeft - containerRect.width / 2 + tabRect.width / 2,
+        behavior: 'smooth',
+      });
     }
   };
 
-  const formatFileSize = (bytes) => {
-    if (bytes < 1024) return bytes + ' B';
-    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
-    return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
-  };
-
   const handleDeleteRecord = (recordId) => {
-    if (window.confirm('Are you sure you want to delete this medical record?')) {
+    if (window.confirm('Delete this medical record? This cannot be undone.')) {
       deleteMedicalRecord(recordId);
     }
   };
 
   const handleViewRecord = (record) => {
-    // Convert base64 data URL to blob URL for viewing
+    // base64 data URL -> blob URL, so the browser opens it in its own viewer
     const byteString = atob(record.data.split(',')[1]);
-    const mimeType = record.type;
     const ab = new ArrayBuffer(byteString.length);
     const ia = new Uint8Array(ab);
     for (let i = 0; i < byteString.length; i++) {
       ia[i] = byteString.charCodeAt(i);
     }
-    const blob = new Blob([ab], { type: mimeType });
-    const blobUrl = URL.createObjectURL(blob);
-    window.open(blobUrl, '_blank');
+    const blob = new Blob([ab], { type: record.type });
+    window.open(URL.createObjectURL(blob), '_blank');
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen gradient-mesh flex flex-col">
-        <div className="max-w-5xl mx-auto p-4 pt-8 flex-1">
-          <CardLoader />
-        </div>
-        <Footer />
-      </div>
+      <AppShell header={{ showBack: true }}>
+        <CardLoader />
+      </AppShell>
     );
   }
 
   if (!currentBaby) {
     return (
-      <div className="min-h-screen gradient-mesh flex flex-col">
-        <div className="max-w-5xl mx-auto p-4 pt-8 flex-1">
-          <Card className="text-center py-12">
-            <h2 className="text-2xl font-semibold mb-4 dark:text-gray-100">No baby selected</h2>
-            <Button onClick={() => navigate('/')} icon={ArrowLeftIcon}>Go to Home</Button>
-          </Card>
-        </div>
-        <Footer />
-      </div>
+      <AppShell header={{ showBack: true }}>
+        <Card>
+          <EmptyState
+            title="No baby selected"
+            message="Pick a profile from the home screen to see its dashboard."
+            action={
+              <Button icon={ArrowLeftIcon} onClick={() => navigate('/')}>
+                Go to home
+              </Button>
+            }
+          />
+        </Card>
+      </AppShell>
     );
   }
 
@@ -122,12 +132,14 @@ const Dashboard = () => {
   const stage = getVaccinationStage(vaccines);
   const overdueVaccines = getOverdueVaccines(vaccines);
 
-  const handleShareClick = () => {
-    // Encode vaccines data for sharing
+  const handleShareClick = async () => {
     const vaccinesData = currentBaby.vaccines ? btoa(JSON.stringify(currentBaby.vaccines)) : '';
-    const shareUrl = `${window.location.origin}/share?name=${encodeURIComponent(currentBaby.name)}&dob=${currentBaby.dob}&v=${vaccinesData}`;
-    navigator.clipboard.writeText(shareUrl);
-    alert('Share link copied to clipboard!');
+    const shareUrl = `${window.location.origin}/share?name=${encodeURIComponent(currentBaby.name)}&dob=${
+      currentBaby.dob
+    }&v=${vaccinesData}`;
+    await navigator.clipboard.writeText(shareUrl);
+    setShareCopied(true);
+    setTimeout(() => setShareCopied(false), 2000);
   };
 
   const handleVaccineToggle = async (vaccineKey) => {
@@ -139,246 +151,208 @@ const Dashboard = () => {
     }
   };
 
+  const medicalRecords = currentBaby.medicalRecords || [];
+
   return (
-    <div className="min-h-screen gradient-mesh flex flex-col">
-      <div className="max-w-5xl mx-auto p-4 py-6 flex-1 w-full">
-        {/* Header */}
-        <Header
-          showBack
-          backIcon
+    <AppShell header={{ showBack: true }}>
+      {babies.length > 1 && (
+        <ChipSelect
+          label="Baby"
+          options={babies.map((baby) => ({ id: baby.id, label: baby.name }))}
+          value={currentBaby.id}
+          onChange={switchBaby}
+          className="mb-6"
         />
+      )}
 
-        {/* Baby Selector */}
-        {babies.length > 1 && (
-          <div className="mb-6">
-            <select
-              value={currentBaby.id}
-              onChange={(e) => switchBaby(e.target.value)}
-              className="glass-card border border-white/10 w-full md:w-auto px-4 py-3 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-gray-900 dark:text-gray-100 font-medium cursor-pointer"
-            >
-              {babies.map(baby => (
-                <option key={baby.id} value={baby.id}>
-                  {baby.name}
-                </option>
-              ))}
-            </select>
-          </div>
-        )}
+      {/* Profile summary */}
+      <Card className="mb-6">
+        <div className="flex flex-col sm:flex-row gap-4 sm:gap-6">
+          <Avatar src={currentBaby.photo} name={currentBaby.name} size="xl" />
 
-        {/* Baby Info Card */}
-        <Card className="mb-6 overflow-hidden">
-          <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-6 mb-6">
-            <div className="relative">
-              {currentBaby.photo ? (
-                <img
-                  src={currentBaby.photo}
-                  alt={currentBaby.name}
-                  className="w-20 h-20 sm:w-24 sm:h-24 rounded-full object-cover ring-4 ring-white/50 dark:ring-gray-700/50 shrink-0"
-                />
-              ) : (
-                <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-gradient-to-br from-indigo-400 to-purple-500 flex items-center justify-center text-white text-3xl sm:text-4xl font-bold ring-4 ring-white/50 dark:ring-gray-700/50 shrink-0">
-                  {currentBaby.name.charAt(0).toUpperCase()}
+          <div className="flex-1 min-w-0">
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <div className="min-w-0">
+                <h1 className="text-2xl sm:text-3xl font-bold text-ink truncate">{currentBaby.name}</h1>
+                <div className="flex flex-wrap items-center gap-1.5 mt-2">
+                  {currentBaby.gender && <Badge tone="neutral">{GENDER_LABELS[currentBaby.gender]}</Badge>}
+                  {currentBaby.bloodGroup && <Badge tone="danger">Blood {currentBaby.bloodGroup}</Badge>}
                 </div>
-              )}
-              {/* Share button on avatar */}
-              <button
-                onClick={handleShareClick}
-                className="absolute -bottom-1 -right-1 p-2 bg-indigo-500 hover:bg-indigo-600 text-white rounded-full shadow-lg transition-colors"
-                title="Share"
-              >
-                <ShareIcon className="w-4 h-4" />
-              </button>
-            </div>
-            <div className="flex-1 min-w-0 text-center sm:text-left">
-              <h1 className="text-2xl sm:text-4xl font-bold text-gray-900 dark:text-gray-100 mb-2 truncate">
-                {currentBaby.name}
-              </h1>
-              <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 mb-3">
-                {currentBaby.gender && (
-                  <span className="text-gray-600 dark:text-gray-400">
-                    {currentBaby.gender === 'male' ? '👦 Boy' : '👧 Girl'}
-                  </span>
-                )}
-                {currentBaby.bloodGroup && (
-                  <span className="px-2 py-1 text-sm font-semibold bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 rounded-lg">
-                    🩸 {currentBaby.bloodGroup}
-                  </span>
-                )}
               </div>
-              {age && (
-                <div className="flex flex-wrap justify-center sm:justify-start gap-2 sm:gap-4 text-sm">
-                  <div className="glass border border-white/10 px-3 sm:px-4 py-2 rounded-lg">
-                    <span className="text-gray-600 dark:text-gray-400">Age: </span>
-                    <span className="font-semibold text-gray-900 dark:text-gray-100">{age.formatted}</span>
-                  </div>
-                  <div className="glass border border-white/10 px-3 sm:px-4 py-2 rounded-lg text-gray-600 dark:text-gray-400">
-                    {age.totalDays} days • {age.totalWeeks} weeks • {age.totalMonths} months
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
 
-          {/* Progress Summary */}
-          <div className="border-t border-gray-200 dark:border-gray-700 pt-6 mt-6">
-            <ProgressBar
-              completed={progress.completed}
-              total={progress.total}
-              percentage={progress.percentage}
-            />
-            <div className="mt-4 flex items-center justify-between flex-wrap gap-3">
-              <span className="text-sm text-gray-700 dark:text-gray-300 glass border border-white/10 px-4 py-2 rounded-full font-medium">
-                {stage}
-              </span>
-              {overdueVaccines.length > 0 && (
-                <span className="text-sm text-red-600 dark:text-red-400 glass border border-white/10 px-4 py-2 rounded-full font-medium">
-                  ⚠️ {overdueVaccines.length} vaccine{overdueVaccines.length > 1 ? 's' : ''} overdue
-                </span>
-              )}
-            </div>
-          </div>
-        </Card>
-
-        {/* Tabs */}
-        <div
-          ref={tabsContainerRef}
-          className="mb-6 -mx-4 px-4 overflow-x-auto scrollbar-hide"
-        >
-          <div className="glass-card border border-white/10 p-1 rounded-xl inline-flex gap-1 min-w-max">
-            {TABS.map(tab => (
-              <button
-                key={tab.id}
-                ref={el => tabRefs.current[tab.id] = el}
-                onClick={() => handleTabClick(tab.id)}
-                className={`px-4 sm:px-6 py-2.5 sm:py-3 font-medium rounded-lg transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer whitespace-nowrap outline-none focus:outline-none ${
-                  activeTab === tab.id
-                    ? 'glass-card border border-white/10 text-indigo-600 dark:text-indigo-400 shadow-lg'
-                    : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
-                }`}
+              <Button
+                variant="secondary"
+                size="sm"
+                icon={shareCopied ? CheckIcon : ShareIcon}
+                onClick={handleShareClick}
               >
-                {tab.emoji ? (
-                  <span className="text-lg sm:text-xl">{tab.emoji}</span>
-                ) : (
-                  <tab.icon className="w-4 h-4 sm:w-5 sm:h-5" />
-                )}
-                <span className="text-sm">{tab.label}</span>
-              </button>
-            ))}
+                {shareCopied ? 'Link copied' : 'Share'}
+              </Button>
+            </div>
+
+            {age && (
+              <div className="grid gap-2 sm:grid-cols-2 mt-4">
+                <div className="stat">
+                  <p className="stat-label">Age</p>
+                  <p className="stat-value">{age.formatted}</p>
+                </div>
+                <div className="stat">
+                  <p className="stat-label">In numbers</p>
+                  <p className="stat-value">
+                    {age.totalDays} days · {age.totalWeeks} weeks · {age.totalMonths} months
+                  </p>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
-        {/* Tab Content */}
-        {activeTab === 'vaccines' && (
-          <div className="space-y-4">
-            <Card>
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-6">
-                Bangladesh EPI Vaccine Schedule
-              </h2>
-              <div className="space-y-4">
-                {vaccines.map(vaccine => (
-                  <VaccineCard
-                    key={vaccine.key}
-                    vaccine={vaccine}
-                    onToggle={handleVaccineToggle}
-                    isLoading={loadingVaccineKey === vaccine.key}
-                  />
-                ))}
-              </div>
-            </Card>
-          </div>
-        )}
-
-        {activeTab === 'milestones' && <MilestoneTracker />}
-
-        {activeTab === 'growth' && <GrowthTracker />}
-
-        {activeTab === 'records' && (
-          <Card>
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-              <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100">
-                Medical Records
-              </h2>
-              {currentBaby.medicalRecords?.length > 0 && (
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => navigate(`/edit-baby/${currentBaby.id}`)}
-                >
-                  Upload New
-                </Button>
-              )}
-            </div>
-
-            {(!currentBaby.medicalRecords || currentBaby.medicalRecords.length === 0) ? (
-              <div className="text-center py-12">
-                <DocumentIcon className="w-16 h-16 mx-auto text-gray-300 dark:text-gray-600 mb-4" />
-                <p className="text-gray-500 dark:text-gray-400 mb-4">No medical records uploaded yet</p>
-                <Button
-                  size="sm"
-                  onClick={() => navigate(`/edit-baby/${currentBaby.id}`)}
-                >
-                  Upload Records
-                </Button>
-              </div>
-            ) : (
-              <div className="space-y-3">
-                {currentBaby.medicalRecords.map(record => (
-                  <div key={record.id} className="glass border border-white/10 flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-xl gap-3">
-                    <div className="flex items-center gap-3 min-w-0">
-                      <div className={`p-2 rounded-lg ${
-                        record.type === 'application/pdf'
-                          ? 'bg-red-100 dark:bg-red-900/30'
-                          : 'bg-blue-100 dark:bg-blue-900/30'
-                      }`}>
-                        <DocumentIcon className={`w-6 h-6 ${
-                          record.type === 'application/pdf'
-                            ? 'text-red-600 dark:text-red-400'
-                            : 'text-blue-600 dark:text-blue-400'
-                        }`} />
-                      </div>
-                      <div className="min-w-0">
-                        <p className="font-medium text-gray-900 dark:text-gray-100 truncate">{record.name}</p>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">
-                          {formatFileSize(record.size)} • {new Date(record.uploadedAt).toLocaleDateString()}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2 shrink-0 self-end sm:self-auto">
-                      <a
-                        href={record.data}
-                        download={record.name}
-                        className="p-2 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 rounded-lg transition-colors"
-                        title="Download"
-                      >
-                        <ArrowDownTrayIcon className="w-5 h-5" />
-                      </a>
-                      {record.type.startsWith('image/') && (
-                        <button
-                          onClick={() => handleViewRecord(record)}
-                          className="p-2 text-green-600 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/30 rounded-lg transition-colors cursor-pointer"
-                          title="View"
-                        >
-                          <EyeIcon className="w-5 h-5" />
-                        </button>
-                      )}
-                      <button
-                        onClick={() => handleDeleteRecord(record.id)}
-                        className="p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors"
-                        title="Delete"
-                      >
-                        <TrashIcon className="w-5 h-5" />
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
+        <div className="border-t border-line pt-5 mt-5 flex flex-col gap-3">
+          <ProgressBar completed={progress.completed} total={progress.total} percentage={progress.percentage} />
+          <div className="flex items-center flex-wrap gap-2">
+            <Badge tone="accent">{stage}</Badge>
+            {overdueVaccines.length > 0 && (
+              <Badge tone="danger">
+                {overdueVaccines.length} vaccine{overdueVaccines.length > 1 ? 's' : ''} overdue
+              </Badge>
             )}
-          </Card>
-        )}
+          </div>
+        </div>
+      </Card>
+
+      {/* Tabs */}
+      <div ref={tabsContainerRef} className="mb-6 -mx-4 px-4 overflow-x-auto scrollbar-hide">
+        <div className="tabs" role="tablist">
+          {TABS.map((tab) => (
+            <button
+              key={tab.id}
+              ref={(el) => {
+                tabRefs.current[tab.id] = el;
+              }}
+              type="button"
+              role="tab"
+              aria-selected={activeTab === tab.id}
+              onClick={() => handleTabClick(tab.id)}
+              className={`tab ${activeTab === tab.id ? 'tab-on' : ''}`}
+            >
+              <tab.icon className="w-[18px] h-[18px]" aria-hidden="true" />
+              {tab.label}
+            </button>
+          ))}
+        </div>
       </div>
 
-      <Footer />
-    </div>
+      {activeTab === 'vaccines' && (
+        <Card key="vaccines" className="motion-enter">
+          <SectionHeader
+            as="h2"
+            title="Bangladesh EPI vaccine schedule"
+            lead="Mark each dose as it is given. Dates are worked out from the date of birth."
+          />
+          <div className="card row-divider">
+            {vaccines.map((vaccine) => (
+              <VaccineCard
+                key={vaccine.key}
+                vaccine={vaccine}
+                onToggle={handleVaccineToggle}
+                isLoading={loadingVaccineKey === vaccine.key}
+              />
+            ))}
+          </div>
+        </Card>
+      )}
+
+      {activeTab === 'milestones' && <MilestoneTracker key="milestones" />}
+
+      {activeTab === 'growth' && <GrowthTracker key="growth" />}
+
+      {activeTab === 'records' && (
+        <Card key="records" className="motion-enter">
+          <SectionHeader
+            as="h2"
+            title="Medical records"
+            lead="Birth certificates, reports and prescriptions kept with the profile."
+            aside={
+              medicalRecords.length > 0 && (
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => navigate(`/edit-baby/${currentBaby.id}`)}
+                >
+                  Upload new
+                </Button>
+              )
+            }
+          />
+
+          {medicalRecords.length === 0 ? (
+            <EmptyState
+              icon={DocumentIcon}
+              title="No records uploaded yet"
+              message="Keep scans and reports next to the vaccine history."
+              action={
+                <Button onClick={() => navigate(`/edit-baby/${currentBaby.id}`)}>Upload records</Button>
+              }
+            />
+          ) : (
+            <div className="card row-divider">
+              {medicalRecords.map((record) => (
+                <div
+                  key={record.id}
+                  className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4"
+                >
+                  <div className="flex items-center gap-3 min-w-0">
+                    <span className="icon-tile w-10 h-10 shrink-0">
+                      <DocumentIcon className="w-5 h-5 text-ink-2" aria-hidden="true" />
+                    </span>
+                    <div className="min-w-0">
+                      <p className="text-sm font-medium text-ink truncate">{record.name}</p>
+                      <p className="text-[13px] text-ink-2">
+                        {formatFileSize(record.size)} · {new Date(record.uploadedAt).toLocaleDateString()}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-1 shrink-0 self-end sm:self-auto">
+                    <a href={record.data} download={record.name} className="btn-icon" title="Download">
+                      <ArrowDownTrayIcon className="w-[18px] h-[18px]" aria-hidden="true" />
+                      <span className="sr-only">Download {record.name}</span>
+                    </a>
+                    {record.type.startsWith('image/') && (
+                      <button
+                        type="button"
+                        onClick={() => handleViewRecord(record)}
+                        className="btn-icon"
+                        title="View"
+                      >
+                        <EyeIcon className="w-[18px] h-[18px]" aria-hidden="true" />
+                        <span className="sr-only">View {record.name}</span>
+                      </button>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => handleDeleteRecord(record.id)}
+                      className="btn-icon btn-icon-danger"
+                      title="Delete"
+                    >
+                      <TrashIcon className="w-[18px] h-[18px]" aria-hidden="true" />
+                      <span className="sr-only">Delete {record.name}</span>
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </Card>
+      )}
+
+      {overdueVaccines.length > 0 && activeTab === 'vaccines' && (
+        <p className="flex items-center gap-2 text-[13px] text-ink-2 mt-4">
+          <ExclamationTriangleIcon className="w-4 h-4 text-danger-fg" aria-hidden="true" />
+          Overdue doses are still worth giving — ask your clinic about catch-up.
+        </p>
+      )}
+    </AppShell>
   );
 };
 

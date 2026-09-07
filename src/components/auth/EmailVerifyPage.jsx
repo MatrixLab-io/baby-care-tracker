@@ -1,8 +1,12 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { isSignInWithEmailLink, signInWithEmailLink } from 'firebase/auth';
+import { CheckCircleIcon, XCircleIcon } from '@heroicons/react/24/outline';
 import { auth } from '../../config/firebase';
 import { getErrorMessage } from '../../utils/errorMessages';
+import Button from '../ui/Button';
+import Card from '../ui/Card';
+import Spinner from '../ui/Spinner';
 
 const EmailVerifyPage = () => {
   const [status, setStatus] = useState('verifying');
@@ -44,78 +48,35 @@ const EmailVerifyPage = () => {
   }, [navigate]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center gradient-mesh p-4">
-      <div className="w-full max-w-md">
-        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8 text-center">
-          {status === 'verifying' && (
-            <>
-              <div className="w-16 h-16 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-              <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-                Verifying your email...
-              </h2>
-              <p className="text-gray-600 dark:text-gray-300">
-                Please wait while we sign you in.
-              </p>
-            </>
-          )}
+    <div className="min-h-screen bg-ground flex items-center justify-center p-4">
+      <Card className="w-full max-w-md text-center motion-rise">
+        {status === 'verifying' && (
+          <>
+            <Spinner size="lg" className="mx-auto mb-4" />
+            <h1 className="text-[17px] font-semibold text-ink">Verifying your email…</h1>
+            <p className="text-sm text-ink-2 mt-1">Hold on while we sign you in.</p>
+          </>
+        )}
 
-          {status === 'success' && (
-            <>
-              <div className="w-16 h-16 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg
-                  className="w-8 h-8 text-green-500"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M5 13l4 4L19 7"
-                  />
-                </svg>
-              </div>
-              <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-                Successfully signed in!
-              </h2>
-              <p className="text-gray-600 dark:text-gray-300">
-                Redirecting you to the app...
-              </p>
-            </>
-          )}
+        {status === 'success' && (
+          <>
+            <CheckCircleIcon className="w-12 h-12 text-live-fg mx-auto mb-4" aria-hidden="true" />
+            <h1 className="text-[17px] font-semibold text-ink">Signed in</h1>
+            <p className="text-sm text-ink-2 mt-1">Taking you to the app…</p>
+          </>
+        )}
 
-          {(status === 'error' || status === 'invalid') && (
-            <>
-              <div className="w-16 h-16 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg
-                  className="w-8 h-8 text-red-500"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                </svg>
-              </div>
-              <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-                Verification failed
-              </h2>
-              <p className="text-gray-600 dark:text-gray-300 mb-4">{error}</p>
-              <button
-                onClick={() => navigate('/auth')}
-                className="px-6 py-2 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition-colors"
-              >
-                Back to Sign In
-              </button>
-            </>
-          )}
-        </div>
-      </div>
+        {(status === 'error' || status === 'invalid') && (
+          <>
+            <XCircleIcon className="w-12 h-12 text-danger-fg mx-auto mb-4" aria-hidden="true" />
+            <h1 className="text-[17px] font-semibold text-ink">Verification failed</h1>
+            <p className="text-sm text-ink-2 mt-1 mb-6">{error}</p>
+            <Button variant="secondary" onClick={() => navigate('/auth')}>
+              Back to sign in
+            </Button>
+          </>
+        )}
+      </Card>
     </div>
   );
 };

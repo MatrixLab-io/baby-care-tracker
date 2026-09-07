@@ -1,40 +1,47 @@
 import { useState } from 'react';
-import { PlusIcon, TrashIcon, ArrowPathIcon } from '@heroicons/react/24/outline';
+import {
+  ArrowPathIcon,
+  CakeIcon,
+  CheckBadgeIcon,
+  GiftIcon,
+  PlusIcon,
+  SparklesIcon,
+  StarIcon,
+  SunIcon,
+  TrashIcon,
+  TrophyIcon,
+} from '@heroicons/react/24/outline';
 import { useBaby } from '../context/BabyContext';
 import { calculateAge } from '../utils/ageCalculator';
-import Button from './Button';
-import Card from './Card';
-import Input from './Input';
+import Badge from './ui/Badge';
+import Button from './ui/Button';
+import Card from './ui/Card';
+import Modal from './ui/Modal';
+import SectionHeader from './ui/SectionHeader';
+import { Field } from './ui/FormField';
 import DatePicker from './DatePicker';
-import Modal from './Modal';
 
 const AUTO_MILESTONES = [
-  { days: 7, label: '1 Week Old', icon: '🎉' },
-  { days: 45, label: '45 Days Old', icon: '🌟' },
-  { days: 90, label: '3 Months Old', icon: '🎊' },
-  { days: 180, label: '6 Months Old', icon: '🎈' },
-  { days: 270, label: '9 Months Old', icon: '🎁' },
-  { days: 365, label: '1 Year Old', icon: '🎂' }
+  { days: 7, label: '1 week old', icon: SparklesIcon },
+  { days: 45, label: '45 days old', icon: StarIcon },
+  { days: 90, label: '3 months old', icon: SunIcon },
+  { days: 180, label: '6 months old', icon: CheckBadgeIcon },
+  { days: 270, label: '9 months old', icon: GiftIcon },
+  { days: 365, label: '1 year old', icon: CakeIcon },
 ];
+
+const today = () => new Date().toISOString().split('T')[0];
 
 const MilestoneTracker = () => {
   const { currentBaby, addMilestone, deleteMilestone } = useBaby();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isAdding, setIsAdding] = useState(false);
   const [deletingId, setDeletingId] = useState(null);
-  const [newMilestone, setNewMilestone] = useState({
-    title: '',
-    description: '',
-    date: new Date().toISOString().split('T')[0]
-  });
+  const [newMilestone, setNewMilestone] = useState({ title: '', description: '', date: today() });
 
   if (!currentBaby) return null;
 
   const age = calculateAge(currentBaby.dob);
-  const achievedAutoMilestones = AUTO_MILESTONES.filter(
-    milestone => age && age.totalDays >= milestone.days
-  );
-
   const customMilestones = currentBaby.milestones || [];
 
   const handleAddMilestone = async () => {
@@ -46,15 +53,9 @@ const MilestoneTracker = () => {
         title: newMilestone.title,
         description: newMilestone.description,
         date: newMilestone.date,
-        isCustom: true
+        isCustom: true,
       });
-
-      setNewMilestone({
-        title: '',
-        description: '',
-        date: new Date().toISOString().split('T')[0]
-      });
-
+      setNewMilestone({ title: '', description: '', date: today() });
       setIsModalOpen(false);
     } finally {
       setIsAdding(false);
@@ -72,69 +73,67 @@ const MilestoneTracker = () => {
 
   return (
     <Card>
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Milestones</h2>
-        <Button size="sm" icon={PlusIcon} onClick={() => setIsModalOpen(true)}>
-          Add Custom
-        </Button>
-      </div>
+      <SectionHeader
+        title="Milestones"
+        lead="Age milestones tick over on their own. Add the ones only you would know."
+        aside={
+          <Button size="sm" icon={PlusIcon} onClick={() => setIsModalOpen(true)}>
+            Add custom
+          </Button>
+        }
+      />
 
-      {/* Auto Milestones */}
       <div className="mb-6">
-        <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-4 uppercase tracking-wide">Age Milestones</h3>
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+        <span className="eyebrow">Age milestones</span>
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mt-3">
           {AUTO_MILESTONES.map((milestone) => {
             const achieved = age && age.totalDays >= milestone.days;
+            const Icon = milestone.icon;
             return (
               <div
                 key={milestone.days}
-                className={`glass-card border border-white/10 p-4 rounded-xl text-center transition-all ${
-                  achieved
-                    ? 'border-2 border-green-400 dark:border-green-600'
-                    : 'opacity-50'
-                }`}
+                className={`card p-4 flex flex-col items-center text-center gap-2 ${achieved ? '' : 'opacity-55'}`}
               >
-                <div className="text-3xl mb-2">{milestone.icon}</div>
-                <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
-                  {milestone.label}
-                </div>
-                {achieved && (
-                  <div className="text-xs text-green-600 dark:text-green-400 mt-2 font-semibold">✓ Achieved</div>
-                )}
+                <span className={`icon-tile w-10 h-10 ${achieved ? 'bg-live-bg text-live-fg' : ''}`}>
+                  <Icon className="w-5 h-5" aria-hidden="true" />
+                </span>
+                <span className="text-[13px] font-medium text-ink">{milestone.label}</span>
+                {achieved ? <Badge tone="live">Achieved</Badge> : <Badge tone="neutral">Not yet</Badge>}
               </div>
             );
           })}
         </div>
       </div>
 
-      {/* Custom Milestones */}
       {customMilestones.length > 0 && (
         <div>
-          <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-4 uppercase tracking-wide">Custom Milestones</h3>
-          <div className="space-y-3">
+          <span className="eyebrow">Custom milestones</span>
+          <div className="card row-divider mt-3">
             {customMilestones.map((milestone) => (
-              <div
-                key={milestone.id}
-                className="glass-card border border-white/10 p-4 rounded-xl flex items-start justify-between hover:scale-[1.01] transition-transform"
-              >
-                <div className="flex-1">
-                  <h4 className="font-semibold text-gray-900 dark:text-gray-100">{milestone.title}</h4>
-                  {milestone.description && (
-                    <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">{milestone.description}</p>
-                  )}
-                  <p className="text-xs text-gray-500 dark:text-gray-500 mt-2">
-                    {new Date(milestone.date).toLocaleDateString()}
-                  </p>
+              <div key={milestone.id} className="flex items-start justify-between gap-3 p-4">
+                <div className="flex items-start gap-3 min-w-0">
+                  <span className="icon-tile w-9 h-9 shrink-0">
+                    <TrophyIcon className="w-[18px] h-[18px]" aria-hidden="true" />
+                  </span>
+                  <div className="min-w-0">
+                    <h3 className="text-sm font-semibold text-ink">{milestone.title}</h3>
+                    {milestone.description && (
+                      <p className="text-[13px] text-ink-2 mt-0.5">{milestone.description}</p>
+                    )}
+                    <p className="text-xs text-ink-3 mt-1">{new Date(milestone.date).toLocaleDateString()}</p>
+                  </div>
                 </div>
                 <button
+                  type="button"
                   onClick={() => handleDeleteMilestone(milestone.id)}
                   disabled={deletingId === milestone.id}
-                  className={`glass-card border border-white/10 p-2 rounded-lg hover:scale-110 transition-transform cursor-pointer delete-icon ${deletingId === milestone.id ? 'opacity-50' : ''}`}
+                  className="btn-icon btn-icon-danger shrink-0"
+                  aria-label={`Delete ${milestone.title}`}
                 >
                   {deletingId === milestone.id ? (
-                    <ArrowPathIcon className="w-5 h-5 animate-spin" />
+                    <ArrowPathIcon className="w-[18px] h-[18px] animate-spin" aria-hidden="true" />
                   ) : (
-                    <TrashIcon className="w-5 h-5" />
+                    <TrashIcon className="w-[18px] h-[18px]" aria-hidden="true" />
                   )}
                 </button>
               </div>
@@ -143,44 +142,49 @@ const MilestoneTracker = () => {
         </div>
       )}
 
-      {/* Add Milestone Modal */}
       <Modal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        title="Add Custom Milestone"
+        title="Add custom milestone"
+        size="sm"
+        dismissable={!isAdding}
       >
-        <Input
-          label="Milestone Title"
-          value={newMilestone.title}
-          onChange={(e) => setNewMilestone({ ...newMilestone, title: e.target.value })}
-          placeholder="e.g., First smile, First step"
-          required
-        />
-        <Input
-          label="Description (Optional)"
-          value={newMilestone.description}
-          onChange={(e) => setNewMilestone({ ...newMilestone, description: e.target.value })}
-          placeholder="Add details about this milestone"
-        />
-        <DatePicker
-          label="Date"
-          value={newMilestone.date}
-          onChange={(e) => setNewMilestone({ ...newMilestone, date: e.target.value })}
-          placeholder="Select date"
-        />
-        <div className="flex gap-3 mt-4">
-          <Button variant="secondary" onClick={() => setIsModalOpen(false)} fullWidth disabled={isAdding}>
-            Cancel
-          </Button>
-          <Button
-            onClick={handleAddMilestone}
-            icon={isAdding ? ArrowPathIcon : PlusIcon}
-            fullWidth
-            disabled={isAdding}
-            className={isAdding ? '[&>svg]:animate-spin' : ''}
-          >
-            {isAdding ? 'Adding...' : 'Add Milestone'}
-          </Button>
+        <div className="flex flex-col gap-4">
+          <Field
+            label="Milestone"
+            name="milestone-title"
+            required
+            value={newMilestone.title}
+            onChange={(e) => setNewMilestone({ ...newMilestone, title: e.target.value })}
+            placeholder="First smile, first step…"
+          />
+          <Field
+            label="Description"
+            name="milestone-description"
+            help="Optional."
+            value={newMilestone.description}
+            onChange={(e) => setNewMilestone({ ...newMilestone, description: e.target.value })}
+            placeholder="Add a detail worth remembering"
+          />
+          <DatePicker
+            label="Date"
+            name="milestone-date"
+            value={newMilestone.date}
+            onChange={(e) => setNewMilestone({ ...newMilestone, date: e.target.value })}
+          />
+          <div className="flex gap-3 pt-1">
+            <Button variant="secondary" onClick={() => setIsModalOpen(false)} fullWidth disabled={isAdding}>
+              Cancel
+            </Button>
+            <Button
+              onClick={handleAddMilestone}
+              icon={isAdding ? ArrowPathIcon : PlusIcon}
+              loading={isAdding}
+              fullWidth
+            >
+              {isAdding ? 'Adding' : 'Add milestone'}
+            </Button>
+          </div>
         </div>
       </Modal>
     </Card>

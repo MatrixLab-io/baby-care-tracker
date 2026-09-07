@@ -1,24 +1,24 @@
 import { useState } from 'react';
-import { PlusIcon, TrashIcon, ChartBarIcon, ArrowPathIcon } from '@heroicons/react/24/outline';
+import { ArrowPathIcon, ChartBarIcon, PlusIcon, TrashIcon } from '@heroicons/react/24/outline';
 import { useBaby } from '../context/BabyContext';
-import Button from './Button';
-import Card from './Card';
-import Input from './Input';
+import Button from './ui/Button';
+import Card from './ui/Card';
+import EmptyState from './ui/EmptyState';
+import Modal from './ui/Modal';
+import SectionHeader from './ui/SectionHeader';
+import { Field } from './ui/FormField';
 import DatePicker from './DatePicker';
-import Modal from './Modal';
 import GrowthChart from './GrowthChart';
+
+const today = () => new Date().toISOString().split('T')[0];
+const EMPTY_RECORD = { date: today(), weight: '', height: '', headCircumference: '' };
 
 const GrowthTracker = () => {
   const { currentBaby, addGrowthRecord, deleteGrowthRecord } = useBaby();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isAdding, setIsAdding] = useState(false);
   const [deletingId, setDeletingId] = useState(null);
-  const [newRecord, setNewRecord] = useState({
-    date: new Date().toISOString().split('T')[0],
-    weight: '',
-    height: '',
-    headCircumference: ''
-  });
+  const [newRecord, setNewRecord] = useState(EMPTY_RECORD);
 
   if (!currentBaby) return null;
 
@@ -33,16 +33,9 @@ const GrowthTracker = () => {
         date: newRecord.date,
         weight: parseFloat(newRecord.weight) || null,
         height: parseFloat(newRecord.height) || null,
-        headCircumference: parseFloat(newRecord.headCircumference) || null
+        headCircumference: parseFloat(newRecord.headCircumference) || null,
       });
-
-      setNewRecord({
-        date: new Date().toISOString().split('T')[0],
-        weight: '',
-        height: '',
-        headCircumference: ''
-      });
-
+      setNewRecord({ ...EMPTY_RECORD, date: today() });
       setIsModalOpen(false);
     } finally {
       setIsAdding(false);
@@ -58,68 +51,72 @@ const GrowthTracker = () => {
     }
   };
 
-  const chartData = growthRecords.map(record => ({
+  const chartData = growthRecords.map((record) => ({
     date: record.date,
     weight: record.weight,
     height: record.height,
-    head: record.headCircumference
+    head: record.headCircumference,
   }));
 
   return (
     <Card>
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Growth Tracker</h2>
-        <Button size="sm" icon={PlusIcon} onClick={() => setIsModalOpen(true)}>
-          Add Record
-        </Button>
-      </div>
+      <SectionHeader
+        title="Growth"
+        lead="Weight, height and head circumference over time."
+        aside={
+          <Button size="sm" icon={PlusIcon} onClick={() => setIsModalOpen(true)}>
+            Add record
+          </Button>
+        }
+      />
 
       {growthRecords.length === 0 ? (
-        <div className="text-center py-12 text-gray-500 dark:text-gray-400">
-          <ChartBarIcon className="w-20 h-20 mx-auto mb-4 text-indigo-500 dark:text-indigo-400" />
-          <p className="text-lg">No growth records yet. Add your first measurement!</p>
-        </div>
+        <EmptyState
+          icon={ChartBarIcon}
+          title="No growth records yet"
+          message="Add a measurement and the chart starts filling in."
+          action={
+            <Button icon={PlusIcon} onClick={() => setIsModalOpen(true)}>
+              Add first record
+            </Button>
+          }
+        />
       ) : (
-        <>
-          {/* Chart */}
-          <div className="glass-card border border-white/10 p-4 rounded-xl mb-6">
+        <div className="flex flex-col gap-6">
+          <div className="card p-4">
             <GrowthChart data={chartData} />
           </div>
 
-          {/* Records Table */}
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+          <div className="card overflow-x-auto">
+            <table className="table">
               <thead>
-                <tr className="glass-card border border-white/10">
-                  <th className="px-4 py-3 text-left font-semibold text-gray-700 dark:text-gray-300">Date</th>
-                  <th className="px-4 py-3 text-left font-semibold text-gray-700 dark:text-gray-300">Weight (kg)</th>
-                  <th className="px-4 py-3 text-left font-semibold text-gray-700 dark:text-gray-300">Height (cm)</th>
-                  <th className="px-4 py-3 text-left font-semibold text-gray-700 dark:text-gray-300">Head (cm)</th>
-                  <th className="px-4 py-3"></th>
+                <tr>
+                  <th>Date</th>
+                  <th>Weight (kg)</th>
+                  <th>Height (cm)</th>
+                  <th>Head (cm)</th>
+                  <th className="w-12" />
                 </tr>
               </thead>
               <tbody>
-                {growthRecords.map((record, index) => (
-                  <tr
-                    key={record.id}
-                    className={`${index % 2 === 0 ? 'glass border border-white/10' : ''} hover:glass-card transition-all`}
-                  >
-                    <td className="px-4 py-3 text-gray-900 dark:text-gray-100">
-                      {new Date(record.date).toLocaleDateString()}
-                    </td>
-                    <td className="px-4 py-3 text-gray-900 dark:text-gray-100">{record.weight || '-'}</td>
-                    <td className="px-4 py-3 text-gray-900 dark:text-gray-100">{record.height || '-'}</td>
-                    <td className="px-4 py-3 text-gray-900 dark:text-gray-100">{record.headCircumference || '-'}</td>
-                    <td className="px-4 py-3">
+                {growthRecords.map((record) => (
+                  <tr key={record.id}>
+                    <td className="whitespace-nowrap">{new Date(record.date).toLocaleDateString()}</td>
+                    <td className="tabular-nums">{record.weight ?? '—'}</td>
+                    <td className="tabular-nums">{record.height ?? '—'}</td>
+                    <td className="tabular-nums">{record.headCircumference ?? '—'}</td>
+                    <td>
                       <button
+                        type="button"
                         onClick={() => handleDeleteRecord(record.id)}
                         disabled={deletingId === record.id}
-                        className={`glass-card border border-white/10 p-2 rounded-lg hover:scale-110 transition-transform cursor-pointer delete-icon ${deletingId === record.id ? 'opacity-50' : ''}`}
+                        className="btn-icon btn-icon-danger"
+                        aria-label="Delete record"
                       >
                         {deletingId === record.id ? (
-                          <ArrowPathIcon className="w-4 h-4 animate-spin" />
+                          <ArrowPathIcon className="w-4 h-4 animate-spin" aria-hidden="true" />
                         ) : (
-                          <TrashIcon className="w-4 h-4" />
+                          <TrashIcon className="w-4 h-4" aria-hidden="true" />
                         )}
                       </button>
                     </td>
@@ -128,59 +125,57 @@ const GrowthTracker = () => {
               </tbody>
             </table>
           </div>
-        </>
+        </div>
       )}
 
-      {/* Add Record Modal */}
       <Modal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        title="Add Growth Record"
-        size="md"
+        title="Add growth record"
+        description="Fill in whatever you measured — all three are optional."
+        size="sm"
+        dismissable={!isAdding}
       >
-        <div className="space-y-3">
+        <div className="flex flex-col gap-4">
           <DatePicker
             label="Date"
+            name="growth-date"
             value={newRecord.date}
             onChange={(e) => setNewRecord({ ...newRecord, date: e.target.value })}
-            placeholder="Select date"
           />
-          <Input
+          <Field
             label="Weight (kg)"
+            name="weight"
             type="number"
             step="0.1"
             value={newRecord.weight}
             onChange={(e) => setNewRecord({ ...newRecord, weight: e.target.value })}
-            placeholder="e.g., 3.5"
+            placeholder="3.5"
           />
-          <Input
+          <Field
             label="Height (cm)"
+            name="height"
             type="number"
             step="0.1"
             value={newRecord.height}
             onChange={(e) => setNewRecord({ ...newRecord, height: e.target.value })}
-            placeholder="e.g., 50.5"
+            placeholder="50.5"
           />
-          <Input
-            label="Head Circumference (cm)"
+          <Field
+            label="Head circumference (cm)"
+            name="headCircumference"
             type="number"
             step="0.1"
             value={newRecord.headCircumference}
             onChange={(e) => setNewRecord({ ...newRecord, headCircumference: e.target.value })}
-            placeholder="e.g., 35.0"
+            placeholder="35.0"
           />
-          <div className="flex gap-3 pt-2">
+          <div className="flex gap-3 pt-1">
             <Button variant="secondary" onClick={() => setIsModalOpen(false)} fullWidth disabled={isAdding}>
               Cancel
             </Button>
-            <Button
-              onClick={handleAddRecord}
-              icon={isAdding ? ArrowPathIcon : PlusIcon}
-              fullWidth
-              disabled={isAdding}
-              className={isAdding ? '[&>svg]:animate-spin' : ''}
-            >
-              {isAdding ? 'Adding...' : 'Add Record'}
+            <Button onClick={handleAddRecord} icon={isAdding ? ArrowPathIcon : PlusIcon} loading={isAdding} fullWidth>
+              {isAdding ? 'Adding' : 'Add record'}
             </Button>
           </div>
         </div>
