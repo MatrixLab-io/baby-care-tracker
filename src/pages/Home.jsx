@@ -14,13 +14,17 @@ import AppShell from '../components/AppShell';
 import { HomeLoader } from '../components/LoadingCard';
 import Alert from '../components/ui/Alert';
 import Avatar from '../components/ui/Avatar';
+import { BoyIcon, GirlIcon } from '../components/ui/GlyphIcons';
 import Badge from '../components/ui/Badge';
 import Button from '../components/ui/Button';
 import Card from '../components/ui/Card';
 import EmptyState from '../components/ui/EmptyState';
 import Modal from '../components/ui/Modal';
 
-const GENDER_LABELS = { male: 'Boy', female: 'Girl' };
+const GENDER = {
+  male: { label: 'Boy', icon: BoyIcon },
+  female: { label: 'Girl', icon: GirlIcon },
+};
 
 const Home = () => {
   const navigate = useNavigate();
@@ -84,7 +88,9 @@ const Home = () => {
                       <h2 className="text-xl font-bold text-ink truncate">{baby.name}</h2>
                       {baby.gender && (
                         <div className="mt-1.5">
-                          <Badge tone="neutral">{GENDER_LABELS[baby.gender]}</Badge>
+                          <Badge tone="neutral" icon={GENDER[baby.gender].icon}>
+                            {GENDER[baby.gender].label}
+                          </Badge>
                         </div>
                       )}
                     </div>

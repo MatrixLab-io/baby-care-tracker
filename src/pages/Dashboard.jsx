@@ -33,6 +33,7 @@ import VaccineCard from '../components/VaccineCard';
 import MilestoneTracker from '../components/MilestoneTracker';
 import GrowthTracker from '../components/GrowthTracker';
 import Avatar from '../components/ui/Avatar';
+import { BloodDropIcon, BoyIcon, GirlIcon } from '../components/ui/GlyphIcons';
 import Badge from '../components/ui/Badge';
 import Button from '../components/ui/Button';
 import Card from '../components/ui/Card';
@@ -47,7 +48,10 @@ const TABS = [
   { id: 'records', label: 'Records', icon: DocumentTextIcon },
 ];
 
-const GENDER_LABELS = { male: 'Boy', female: 'Girl' };
+const GENDER = {
+  male: { label: 'Boy', icon: BoyIcon },
+  female: { label: 'Girl', icon: GirlIcon },
+};
 
 const formatFileSize = (bytes) => {
   if (bytes < 1024) return `${bytes} B`;
@@ -194,8 +198,16 @@ const Dashboard = () => {
               <div className="min-w-0">
                 <h1 className="text-2xl sm:text-3xl font-bold text-ink truncate">{currentBaby.name}</h1>
                 <div className="flex flex-wrap items-center gap-1.5 mt-2">
-                  {currentBaby.gender && <Badge tone="neutral">{GENDER_LABELS[currentBaby.gender]}</Badge>}
-                  {currentBaby.bloodGroup && <Badge tone="danger">Blood {currentBaby.bloodGroup}</Badge>}
+                  {currentBaby.gender && (
+                    <Badge tone="neutral" icon={GENDER[currentBaby.gender].icon}>
+                      {GENDER[currentBaby.gender].label}
+                    </Badge>
+                  )}
+                  {currentBaby.bloodGroup && (
+                    <Badge tone="danger" icon={BloodDropIcon}>
+                      Blood {currentBaby.bloodGroup}
+                    </Badge>
+                  )}
                 </div>
               </div>
 

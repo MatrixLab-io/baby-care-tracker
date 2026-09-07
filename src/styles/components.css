@@ -80,7 +80,7 @@
 
   /* --- Badges ------------------------------------------------------------- */
   .badge {
-    @apply inline-flex items-center h-5 px-2 rounded-full text-xs font-medium leading-5 whitespace-nowrap;
+    @apply inline-flex items-center gap-1 h-5 px-2 rounded-full text-xs font-medium leading-5 whitespace-nowrap;
   }
   .badge-live { @apply bg-live-bg text-live-fg; }
   .badge-soon { @apply bg-soon-bg text-soon-fg; }

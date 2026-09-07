@@ -14,6 +14,7 @@ import AppShell from '../components/AppShell';
 import DatePicker from '../components/DatePicker';
 import Alert from '../components/ui/Alert';
 import Avatar from '../components/ui/Avatar';
+import { BloodDropIcon, BoyIcon, GirlIcon } from '../components/ui/GlyphIcons';
 import Button from '../components/ui/Button';
 import Card from '../components/ui/Card';
 import ChipSelect from '../components/ui/ChipSelect';
@@ -22,8 +23,8 @@ import { Field } from '../components/ui/FormField';
 
 const BLOOD_GROUPS = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
 const GENDERS = [
-  { id: 'male', label: 'Boy' },
-  { id: 'female', label: 'Girl' },
+  { id: 'male', label: 'Boy', icon: BoyIcon },
+  { id: 'female', label: 'Girl', icon: GirlIcon },
 ];
 
 // Storage limits
@@ -260,6 +261,7 @@ const AddEditBaby = () => {
 
             <ChipSelect
               label="Blood group"
+              labelIcon={BloodDropIcon}
               help="Optional."
               options={BLOOD_GROUPS}
               value={formData.bloodGroup}

@@ -7,6 +7,7 @@ import { CheckIcon } from '@heroicons/react/20/solid';
  */
 export default function ChipSelect({
   label,
+  labelIcon: LabelIcon,
   required,
   help,
   error,
@@ -23,7 +24,8 @@ export default function ChipSelect({
   return (
     <div className={className}>
       {label && (
-        <span className="label">
+        <span className="label inline-flex items-center gap-1.5">
+          {LabelIcon && <LabelIcon className="w-4 h-4 text-ink-2" />}
           {label}
           {required && <span className="text-danger-fg ml-0.5">*</span>}
         </span>
