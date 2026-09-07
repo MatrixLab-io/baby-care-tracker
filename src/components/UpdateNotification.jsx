@@ -4,6 +4,7 @@ import Button from './ui/Button';
 
 const UpdateNotification = () => {
   const [showUpdate, setShowUpdate] = useState(false);
+  const [updating, setUpdating] = useState(false);
   const [registration, setRegistration] = useState(null);
 
   useEffect(() => {
@@ -17,9 +18,18 @@ const UpdateNotification = () => {
   }, []);
 
   const handleRefresh = () => {
+    setUpdating(true);
+
     if (registration?.waiting) {
+      // Reloading here would just re-run the old build: the new worker has not
+      // taken over yet. Tell it to activate, and the controllerchange listener
+      // in serviceWorkerRegistration reloads once it has.
       registration.waiting.postMessage({ type: 'SKIP_WAITING' });
+      // Belt and braces, in case activation never fires.
+      setTimeout(() => window.location.reload(), 3000);
+      return;
     }
+
     window.location.reload();
   };
 
@@ -39,10 +49,10 @@ const UpdateNotification = () => {
           <h2 className="text-sm font-semibold text-ink">Update available</h2>
           <p className="text-[13px] text-ink-2 mt-0.5">A new version is ready. Refresh to update.</p>
           <div className="flex gap-2 mt-3">
-            <Button size="sm" onClick={handleRefresh}>
-              Refresh now
+            <Button size="sm" icon={updating ? ArrowPathIcon : undefined} loading={updating} onClick={handleRefresh}>
+              {updating ? 'Updating' : 'Refresh now'}
             </Button>
-            <Button size="sm" variant="secondary" onClick={() => setShowUpdate(false)}>
+            <Button size="sm" variant="secondary" disabled={updating} onClick={() => setShowUpdate(false)}>
               Later
             </Button>
           </div>
