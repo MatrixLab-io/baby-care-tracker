@@ -1,110 +1,27 @@
 import { useState, useEffect } from 'react';
-import { SparklesIcon } from '@heroicons/react/24/outline';
+import { useNavigate } from 'react-router-dom';
+import { ArrowRightIcon, SparklesIcon } from '@heroicons/react/24/outline';
+import { fetchReleases, formatReleaseDate } from '../services/githubReleases';
+import ReleaseNotes from './ReleaseNotes';
 import Badge from './ui/Badge';
+import Button from './ui/Button';
 import Modal from './ui/Modal';
 import Spinner from './ui/Spinner';
 
-const REPO = 'MatrixLab-io/baby-care-tracker';
 const SEEN_KEY = 'whatsNewSeenVersion';
 
-function parseMarkdown(text) {
-  if (!text) return [];
-  const lines = text.split('\n');
-  const blocks = [];
-  let listItems = [];
-
-  const flushList = () => {
-    if (listItems.length > 0) {
-      blocks.push({ type: 'list', items: [...listItems] });
-      listItems = [];
-    }
-  };
-
-  for (const raw of lines) {
-    const line = raw.trim();
-    if (!line) {
-      flushList();
-      continue;
-    }
-
-    if (line.startsWith('### ')) {
-      flushList();
-      blocks.push({ type: 'h3', text: line.slice(4) });
-    } else if (line.startsWith('## ')) {
-      flushList();
-      blocks.push({ type: 'h2', text: line.slice(3) });
-    } else if (line.startsWith('- ') || line.startsWith('* ')) {
-      listItems.push(line.slice(2));
-    } else {
-      flushList();
-      blocks.push({ type: 'p', text: line });
-    }
-  }
-  flushList();
-  return blocks;
-}
-
-function ReleaseNotes({ body }) {
-  const blocks = parseMarkdown(body);
-  return (
-    <div className="flex flex-col gap-2.5">
-      {blocks.map((block, i) => {
-        if (block.type === 'h2') {
-          return (
-            <h4 key={i} className="text-[13px] font-semibold text-ink pt-1.5 first:pt-0">
-              {block.text}
-            </h4>
-          );
-        }
-        if (block.type === 'h3') {
-          return (
-            <h5 key={i} className="eyebrow text-xs">
-              {block.text}
-            </h5>
-          );
-        }
-        if (block.type === 'list') {
-          return (
-            <ul key={i} className="flex flex-col gap-1.5">
-              {block.items.map((item, j) => (
-                <li key={j} className="flex items-start gap-2 text-[13px] text-ink-2">
-                  <span className="mt-[7px] h-1 w-1 rounded-full bg-accent shrink-0" aria-hidden="true" />
-                  {item}
-                </li>
-              ))}
-            </ul>
-          );
-        }
-        if (block.type === 'p') {
-          return (
-            <p key={i} className="text-[13px] text-ink-2">
-              {block.text}
-            </p>
-          );
-        }
-        return null;
-      })}
-    </div>
-  );
-}
-
-const formatDate = (iso) =>
-  iso ? new Date(iso).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : '';
-
 export default function WhatsNew() {
+  const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
   const [releases, setReleases] = useState([]);
   const [hasNew, setHasNew] = useState(false);
 
   useEffect(() => {
-    fetch(`https://api.github.com/repos/${REPO}/releases?per_page=3`)
-      .then((r) => r.json())
+    fetchReleases({ perPage: 3 })
       .then((data) => {
-        if (Array.isArray(data) && data.length > 0) {
-          setReleases(data);
-          const seen = localStorage.getItem(SEEN_KEY);
-          if (seen !== data[0].tag_name) setHasNew(true);
-        }
+        if (data.length === 0) return;
+        setReleases(data);
+        if (localStorage.getItem(SEEN_KEY) !== data[0].tag_name) setHasNew(true);
       })
       .catch(() => {});
   }, []);
@@ -115,6 +32,11 @@ export default function WhatsNew() {
       localStorage.setItem(SEEN_KEY, releases[0].tag_name);
       setHasNew(false);
     }
+  };
+
+  const viewAll = () => {
+    setIsOpen(false);
+    navigate('/changelog');
   };
 
   return (
@@ -153,16 +75,16 @@ export default function WhatsNew() {
                     </span>
                     {index === 0 && <Badge tone="accent">Latest</Badge>}
                   </div>
-                  <span className="text-xs text-ink-3 shrink-0">{formatDate(release.published_at)}</span>
+                  <span className="text-xs text-ink-3 shrink-0">{formatReleaseDate(release.published_at)}</span>
                 </div>
 
-                {release.body ? (
-                  <ReleaseNotes body={release.body} />
-                ) : (
-                  <p className="text-[13px] text-ink-3">No release notes.</p>
-                )}
+                <ReleaseNotes body={release.body} />
               </div>
             ))}
+
+            <Button variant="secondary" icon={ArrowRightIcon} onClick={viewAll} fullWidth>
+              View all releases
+            </Button>
           </div>
         ) : (
           <div className="flex justify-center py-8">
