@@ -10,6 +10,15 @@
 const VERSION = '__APP_VERSION__';
 const CACHE_NAME = `mybabycare-${VERSION}`;
 
+/**
+ * Bump this only when a release changes the installed app's identity — its
+ * icons, its name, or the manifest. Operating systems cache those at install
+ * time and refresh them lazily or not at all, so when the running app and the
+ * incoming one disagree, the update prompt warns that a reinstall may be
+ * needed before the new icon shows up.
+ */
+const IDENTITY_VERSION = 1;
+
 // The shell needed to boot offline. Hashed assets are cached on demand.
 const PRECACHE_URLS = [
   '/',
@@ -103,6 +112,6 @@ self.addEventListener('message', (event) => {
     self.skipWaiting();
   }
   if (event.data?.type === 'GET_VERSION') {
-    event.ports[0]?.postMessage({ version: VERSION });
+    event.ports[0]?.postMessage({ version: VERSION, identity: IDENTITY_VERSION });
   }
 });
