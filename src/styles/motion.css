@@ -20,6 +20,11 @@
   0%, 100% { background-color: var(--ml-surface); }
   50%      { background-color: var(--ml-accent-tint); }
 }
+/* Critical outbreak alerts breathe, so they read as live rather than static. */
+@keyframes ml-pulse-soft {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.85; }
+}
 /* Toasts and the update prompt slide in from the bottom edge. */
 @keyframes ml-slide-up {
   from { opacity: 0; transform: translateY(20px); }
@@ -52,6 +57,10 @@
   .motion-slide-up {
     animation: ml-slide-up 0.3s cubic-bezier(0.2, 0.7, 0.2, 1) both;
   }
+
+  .motion-pulse-soft {
+    animation: ml-pulse-soft 3s ease-in-out infinite;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -59,7 +68,8 @@
   .motion-enter,
   .motion-tile,
   .motion-tile-live,
-  .motion-slide-up {
+  .motion-slide-up,
+  .motion-pulse-soft {
     animation: none !important;
     opacity: 1;
   }

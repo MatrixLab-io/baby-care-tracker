@@ -3,6 +3,7 @@ import { ArrowLeftIcon } from '@heroicons/react/24/outline';
 import Logo from './ui/Logo';
 import ThemeToggle from './ui/ThemeToggle';
 import PrivacyNotice from './PrivacyNotice';
+import WhatsNew from './WhatsNew';
 import UserMenu from './auth/UserMenu';
 
 /**
@@ -14,6 +15,7 @@ const Header = ({
   backPath = '/',
   backLabel = 'Back',
   rightContent = null,
+  showWhatsNew = true,
   showPrivacy = true,
   showUser = true,
 }) => {
@@ -38,6 +40,7 @@ const Header = ({
 
         <div className="flex items-center gap-2">
           {rightContent}
+          {showWhatsNew && <WhatsNew />}
           {showPrivacy && <PrivacyNotice />}
           <ThemeToggle />
           {showUser && <UserMenu />}

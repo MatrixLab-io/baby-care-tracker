@@ -24,7 +24,12 @@ const DatePicker = ({
   const inputRef = useRef(null);
   const flatpickrRef = useRef(null);
   const onChangeRef = useRef(onChange);
-  onChangeRef.current = onChange;
+
+  // flatpickr keeps the callback it was built with, so the latest one lives in
+  // a ref. Written in an effect, never during render.
+  useEffect(() => {
+    onChangeRef.current = onChange;
+  }, [onChange]);
 
   useEffect(() => {
     if (!inputRef.current) return undefined;

@@ -2,7 +2,13 @@ import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { ExclamationTriangleIcon } from '@heroicons/react/24/outline';
 import { calculateAge } from '../utils/ageCalculator';
-import { getVaccineStatus, getVaccineProgress, getVaccinationStage } from '../utils/vaccineEngine';
+import {
+  getVaccineStatus,
+  getVaccineProgress,
+  getVaccinationStage,
+  getPrivateVaccineStatus,
+  getCombinedProgress,
+} from '../utils/vaccineEngine';
 import { sanitizeString, validateDob, validateBase64Json } from '../utils/validation';
 import AppShell from '../components/AppShell';
 import ProgressBar from '../components/ProgressBar';
@@ -56,7 +62,10 @@ const SharedView = () => {
 
   const age = calculateAge(babyData.dob);
   const vaccines = getVaccineStatus(babyData.dob, babyData.vaccines || {});
+  const privateVaccines = getPrivateVaccineStatus(babyData.dob, babyData.vaccines || {});
   const progress = getVaccineProgress(vaccines);
+  const privateProgress = getVaccineProgress(privateVaccines);
+  const combinedProgress = getCombinedProgress(vaccines, privateVaccines);
   const stage = getVaccinationStage(vaccines);
 
   return (
@@ -86,15 +95,32 @@ const SharedView = () => {
         </div>
 
         <div className="border-t border-line pt-5 mt-5 flex flex-col gap-3">
-          <ProgressBar completed={progress.completed} total={progress.total} percentage={progress.percentage} />
-          <div>
-            <Badge tone="accent">{stage}</Badge>
+          <ProgressBar
+            completed={combinedProgress.completed}
+            total={combinedProgress.total}
+            percentage={combinedProgress.percentage}
+            label="Overall vaccination progress"
+          />
+          <div className="flex flex-wrap items-center gap-2">
+            <Badge tone="soon">
+              EPI {progress.completed}/{progress.total}
+            </Badge>
+            <Badge tone="accent">
+              Private {privateProgress.completed}/{privateProgress.total}
+            </Badge>
+            <Badge tone="neutral">{stage}</Badge>
           </div>
         </div>
       </Card>
 
       <Card>
-        <SectionHeader as="h2" title="Vaccine schedule" className="mb-4" />
+        <SectionHeader
+          as="h2"
+          title="EPI vaccine schedule"
+          lead={`${progress.completed} of ${progress.total} given.`}
+          aside={<Badge tone="soon">Government</Badge>}
+          className="mb-4"
+        />
         <div className="card row-divider">
           {vaccines.map((vaccine) => (
             <VaccineCard key={vaccine.key} vaccine={vaccine} readOnly />
@@ -102,9 +128,25 @@ const SharedView = () => {
         </div>
       </Card>
 
+      <Card className="mt-6">
+        <SectionHeader
+          as="h2"
+          title="Private vaccination schedule"
+          lead={`${privateProgress.completed} of ${privateProgress.total} given.`}
+          aside={<Badge tone="accent">Private</Badge>}
+          className="mb-4"
+        />
+        <div className="card row-divider">
+          {privateVaccines.map((vaccine) => (
+            <VaccineCard key={vaccine.key} vaccine={vaccine} readOnly />
+          ))}
+        </div>
+      </Card>
+
       <Alert tone="caution" icon={ExclamationTriangleIcon} title="Medical disclaimer" className="mt-6">
-        This app follows the Bangladesh EPI schedule. Always consult a qualified healthcare professional for
-        medical advice and vaccination guidance.
+        This app follows the Bangladesh EPI schedule and includes additional private vaccination
+        recommendations. Always consult a qualified healthcare professional for medical advice and
+        vaccination guidance.
       </Alert>
     </AppShell>
   );

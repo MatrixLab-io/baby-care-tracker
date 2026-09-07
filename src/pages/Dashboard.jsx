@@ -21,9 +21,12 @@ import {
   getVaccineProgress,
   getVaccinationStage,
   getOverdueVaccines,
+  getPrivateVaccineStatus,
+  getCombinedProgress,
 } from '../utils/vaccineEngine';
 import AppShell from '../components/AppShell';
 import { CardLoader } from '../components/LoadingCard';
+import OutbreakAlert from '../components/OutbreakAlert';
 import ProgressBar from '../components/ProgressBar';
 import VaccineCard from '../components/VaccineCard';
 import MilestoneTracker from '../components/MilestoneTracker';
@@ -128,9 +131,12 @@ const Dashboard = () => {
 
   const age = calculateAge(currentBaby.dob);
   const vaccines = getVaccineStatus(currentBaby.dob, currentBaby.vaccines);
+  const privateVaccines = getPrivateVaccineStatus(currentBaby.dob, currentBaby.vaccines);
   const progress = getVaccineProgress(vaccines);
+  const privateProgress = getVaccineProgress(privateVaccines);
+  const combinedProgress = getCombinedProgress(vaccines, privateVaccines);
   const stage = getVaccinationStage(vaccines);
-  const overdueVaccines = getOverdueVaccines(vaccines);
+  const overdueCount = getOverdueVaccines(vaccines).length + getOverdueVaccines(privateVaccines).length;
 
   const handleShareClick = async () => {
     const vaccinesData = currentBaby.vaccines ? btoa(JSON.stringify(currentBaby.vaccines)) : '';
@@ -164,6 +170,8 @@ const Dashboard = () => {
           className="mb-6"
         />
       )}
+
+      <OutbreakAlert completedVaccines={currentBaby.vaccines || {}} />
 
       {/* Profile summary */}
       <Card className="mb-6">
@@ -208,12 +216,23 @@ const Dashboard = () => {
         </div>
 
         <div className="border-t border-line pt-5 mt-5 flex flex-col gap-3">
-          <ProgressBar completed={progress.completed} total={progress.total} percentage={progress.percentage} />
+          <ProgressBar
+            completed={combinedProgress.completed}
+            total={combinedProgress.total}
+            percentage={combinedProgress.percentage}
+            label="Overall vaccination progress"
+          />
           <div className="flex items-center flex-wrap gap-2">
-            <Badge tone="accent">{stage}</Badge>
-            {overdueVaccines.length > 0 && (
+            <Badge tone="soon">
+              EPI {progress.completed}/{progress.total}
+            </Badge>
+            <Badge tone="accent">
+              Private {privateProgress.completed}/{privateProgress.total}
+            </Badge>
+            <Badge tone="neutral">{stage}</Badge>
+            {overdueCount > 0 && (
               <Badge tone="danger">
-                {overdueVaccines.length} vaccine{overdueVaccines.length > 1 ? 's' : ''} overdue
+                {overdueCount} vaccine{overdueCount > 1 ? 's' : ''} overdue
               </Badge>
             )}
           </div>
@@ -243,23 +262,45 @@ const Dashboard = () => {
       </div>
 
       {activeTab === 'vaccines' && (
-        <Card key="vaccines" className="motion-enter">
-          <SectionHeader
-            as="h2"
-            title="Bangladesh EPI vaccine schedule"
-            lead="Mark each dose as it is given. Dates are worked out from the date of birth."
-          />
-          <div className="card row-divider">
-            {vaccines.map((vaccine) => (
-              <VaccineCard
-                key={vaccine.key}
-                vaccine={vaccine}
-                onToggle={handleVaccineToggle}
-                isLoading={loadingVaccineKey === vaccine.key}
-              />
-            ))}
-          </div>
-        </Card>
+        <div key="vaccines" className="flex flex-col gap-6 motion-enter">
+          <Card>
+            <SectionHeader
+              as="h2"
+              title="Bangladesh EPI vaccine schedule"
+              lead={`Expanded Programme on Immunization — ${progress.completed} of ${progress.total} given.`}
+              aside={<Badge tone="soon">Government</Badge>}
+            />
+            <div className="card row-divider">
+              {vaccines.map((vaccine) => (
+                <VaccineCard
+                  key={vaccine.key}
+                  vaccine={vaccine}
+                  onToggle={handleVaccineToggle}
+                  isLoading={loadingVaccineKey === vaccine.key}
+                />
+              ))}
+            </div>
+          </Card>
+
+          <Card>
+            <SectionHeader
+              as="h2"
+              title="Private vaccination schedule"
+              lead={`Additional recommended vaccines — ${privateProgress.completed} of ${privateProgress.total} given.`}
+              aside={<Badge tone="accent">Private</Badge>}
+            />
+            <div className="card row-divider">
+              {privateVaccines.map((vaccine) => (
+                <VaccineCard
+                  key={vaccine.key}
+                  vaccine={vaccine}
+                  onToggle={handleVaccineToggle}
+                  isLoading={loadingVaccineKey === vaccine.key}
+                />
+              ))}
+            </div>
+          </Card>
+        </div>
       )}
 
       {activeTab === 'milestones' && <MilestoneTracker key="milestones" />}
@@ -346,7 +387,7 @@ const Dashboard = () => {
         </Card>
       )}
 
-      {overdueVaccines.length > 0 && activeTab === 'vaccines' && (
+      {overdueCount > 0 && activeTab === 'vaccines' && (
         <p className="flex items-center gap-2 text-[13px] text-ink-2 mt-4">
           <ExclamationTriangleIcon className="w-4 h-4 text-danger-fg" aria-hidden="true" />
           Overdue doses are still worth giving — ask your clinic about catch-up.

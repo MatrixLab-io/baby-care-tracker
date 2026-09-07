@@ -3,7 +3,7 @@ import { useLocation, Navigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import Alert from '../ui/Alert';
 import Card from '../ui/Card';
-import { LogoMark } from '../ui/Logo';
+import BrandMark from '../BrandMark';
 import { PageSpinner } from '../ui/Spinner';
 import ThemeToggle from '../ui/ThemeToggle';
 import GoogleSignInButton from './GoogleSignInButton';
@@ -52,7 +52,7 @@ const AuthPage = () => {
       <div className="flex-1 flex items-center justify-center p-4">
         <div className="w-full max-w-md flex flex-col gap-6 motion-rise">
           <div className="flex flex-col gap-3">
-            <LogoMark size={44} />
+            <BrandMark className="w-11 h-11" />
             <div>
               <h1 className="font-brand tracking-[-0.035em] text-[26px] text-ink">MyBabyCare</h1>
               <p className="text-[15px] text-ink-2 mt-1">
