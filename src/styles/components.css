@@ -36,6 +36,11 @@
   .card-inverse {
     @apply bg-surface-inverse text-ink-inverse border-surface-inverse;
   }
+  /* base.css pins headings to text-ink, which is invisible once the surface
+     flips. Headings inside an inverse card follow the card. */
+  .card-inverse :is(h1, h2, h3, h4) {
+    @apply text-ink-inverse;
+  }
 
   /* --- Buttons ------------------------------------------------------------ */
   .btn {
