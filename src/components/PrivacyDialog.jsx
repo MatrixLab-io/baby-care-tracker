@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { ArrowPathIcon, ExclamationTriangleIcon, TrashIcon } from '@heroicons/react/24/outline';
 import { useBaby } from '../context/BabyContext';
 import { useAuth } from '../context/AuthContext';
@@ -23,6 +24,7 @@ const GUARANTEES = [
  * signed-in routes.
  */
 const PrivacyDialog = ({ isOpen, onClose }) => {
+  const navigate = useNavigate();
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState('');
@@ -40,8 +42,9 @@ const PrivacyDialog = ({ isOpen, onClose }) => {
     setDeleteError('');
     try {
       await deleteAllUserData();
-      await signOut();
       close();
+      navigate('/', { replace: true });
+      await signOut();
     } catch (err) {
       setDeleteError(getErrorMessage(err));
     } finally {

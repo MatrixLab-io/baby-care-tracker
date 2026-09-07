@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   ArrowRightStartOnRectangleIcon,
   ChevronDownIcon,
@@ -11,6 +12,7 @@ import PrivacyDialog from '../PrivacyDialog';
 // showPrivacy is off wherever there is no BabyProvider — the landing page can
 // show a signed-in user their account without loading their children.
 const UserMenu = ({ showPrivacy = true }) => {
+  const navigate = useNavigate();
   const { user, signOut } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const [privacyOpen, setPrivacyOpen] = useState(false);
@@ -27,6 +29,10 @@ const UserMenu = ({ showPrivacy = true }) => {
   }, []);
 
   const handleSignOut = async () => {
+    // Move to the public page first. Signing out while still on a guarded
+    // route bounces through /auth, which leaves you staring at a sign-in form
+    // you just chose to leave.
+    navigate('/', { replace: true });
     try {
       await signOut();
     } catch (error) {

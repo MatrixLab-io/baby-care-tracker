@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useLocation, Navigate } from 'react-router-dom';
+import { Link, useLocation, Navigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import Alert from '../ui/Alert';
 import Card from '../ui/Card';
@@ -52,13 +52,16 @@ const AuthPage = () => {
       <div className="flex-1 flex items-center justify-center p-4">
         <div className="w-full max-w-md flex flex-col gap-6 motion-rise">
           <div className="flex flex-col gap-3">
-            <BrandMark className="w-11 h-11" />
-            <div>
-              <h1 className="font-brand tracking-[-0.035em] text-[26px] text-ink">MyBabyCare</h1>
-              <p className="text-[15px] text-ink-2 mt-1">
-                Vaccines, growth and milestones — on the Bangladesh EPI schedule.
-              </p>
-            </div>
+            {/* Reaching /auth directly should not be a dead end. */}
+            <Link to="/" className="flex flex-col gap-3 hover:opacity-80 transition-opacity" aria-label="MyBabyCare home">
+              <BrandMark className="w-11 h-11" />
+              <div>
+                <h1 className="font-brand tracking-[-0.035em] text-[26px] text-ink">MyBabyCare</h1>
+                <p className="text-[15px] text-ink-2 mt-1">
+                  Vaccines, growth and milestones — on the Bangladesh EPI schedule.
+                </p>
+              </div>
+            </Link>
           </div>
 
           <Card>
