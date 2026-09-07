@@ -21,13 +21,15 @@ import SectionHeader from './ui/SectionHeader';
 import { Field } from './ui/FormField';
 import DatePicker from './DatePicker';
 
+// Each milestone gets its own tint so the six tiles are told apart at a glance.
+// These are the categorical tokens, not the status ones — see tokens.css.
 const AUTO_MILESTONES = [
-  { days: 7, label: '1 week old', icon: SparklesIcon },
-  { days: 45, label: '45 days old', icon: StarIcon },
-  { days: 90, label: '3 months old', icon: SunIcon },
-  { days: 180, label: '6 months old', icon: CheckBadgeIcon },
-  { days: 270, label: '9 months old', icon: GiftIcon },
-  { days: 365, label: '1 year old', icon: CakeIcon },
+  { days: 7, label: '1 week old', icon: SparklesIcon, tone: 'tile-cat-1' },
+  { days: 45, label: '45 days old', icon: StarIcon, tone: 'tile-cat-2' },
+  { days: 90, label: '3 months old', icon: SunIcon, tone: 'tile-cat-3' },
+  { days: 180, label: '6 months old', icon: CheckBadgeIcon, tone: 'tile-cat-4' },
+  { days: 270, label: '9 months old', icon: GiftIcon, tone: 'tile-cat-5' },
+  { days: 365, label: '1 year old', icon: CakeIcon, tone: 'tile-cat-6' },
 ];
 
 const today = () => new Date().toISOString().split('T')[0];
@@ -92,10 +94,12 @@ const MilestoneTracker = () => {
             return (
               <div
                 key={milestone.days}
-                className={`card p-4 flex flex-col items-center text-center gap-2 ${achieved ? '' : 'opacity-55'}`}
+                className={`card shadow-soft p-4 flex flex-col items-center text-center gap-2 transition-[box-shadow,translate] duration-200 ${
+                  achieved ? 'hover:-translate-y-0.5 hover:shadow-lift' : 'opacity-60'
+                }`}
               >
-                <span className={`icon-tile w-10 h-10 ${achieved ? 'bg-live-bg text-live-fg' : ''}`}>
-                  <Icon className="w-5 h-5" aria-hidden="true" />
+                <span className={`icon-tile w-11 h-11 ${achieved ? milestone.tone : ''}`}>
+                  <Icon className="w-[22px] h-[22px]" aria-hidden="true" />
                 </span>
                 <span className="text-[13px] font-medium text-ink">{milestone.label}</span>
                 {achieved ? <Badge tone="live">Achieved</Badge> : <Badge tone="neutral">Not yet</Badge>}
@@ -112,7 +116,7 @@ const MilestoneTracker = () => {
             {customMilestones.map((milestone) => (
               <div key={milestone.id} className="flex items-start justify-between gap-3 p-4">
                 <div className="flex items-start gap-3 min-w-0">
-                  <span className="icon-tile w-9 h-9 shrink-0">
+                  <span className="icon-tile w-9 h-9 shrink-0 bg-accent-soft text-accent-soft-fg">
                     <TrophyIcon className="w-[18px] h-[18px]" aria-hidden="true" />
                   </span>
                   <div className="min-w-0">

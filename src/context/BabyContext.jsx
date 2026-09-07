@@ -7,6 +7,7 @@ import {
   updateBaby as updateBabyInFirestore,
   deleteBaby as deleteBabyFromFirestore,
   toggleVaccine,
+  setVaccineState,
   addMilestone as addMilestoneToFirestore,
   deleteMilestone as deleteMilestoneFromFirestore,
   addGrowthRecord as addGrowthRecordToFirestore,
@@ -128,6 +129,22 @@ export const BabyProvider = ({ children }) => {
       }
     } catch (err) {
       console.error('Error toggling vaccine:', err);
+      setError(getErrorMessage(err));
+      throw err;
+    }
+  };
+
+  const setVaccineStateFor = async (vaccineKey, state) => {
+    if (!currentBabyId) return;
+
+    setError(null);
+    try {
+      const updated = await setVaccineState(currentBabyId, vaccineKey, state);
+      if (updated) {
+        setBabies(prev => prev.map(baby => baby.id === currentBabyId ? updated : baby));
+      }
+    } catch (err) {
+      console.error('Error updating vaccine:', err);
       setError(getErrorMessage(err));
       throw err;
     }
@@ -260,6 +277,7 @@ export const BabyProvider = ({ children }) => {
     deleteBaby,
     switchBaby,
     toggleVaccineStatus,
+    setVaccineState: setVaccineStateFor,
     addMilestone,
     deleteMilestone,
     addGrowthRecord,

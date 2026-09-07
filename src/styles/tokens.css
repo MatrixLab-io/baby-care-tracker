@@ -23,6 +23,9 @@
   --ml-line-strong: #c9cccf;
 
   --ml-accent: #0d9488;
+  /* Text and icons that sit on a filled accent. Dark mode flips this to ink,
+     because white on bright teal is unreadable. */
+  --ml-accent-fg: #ffffff;
   --ml-accent-strong: #0f766e;
   --ml-accent-soft: #ccfbf1;
   --ml-accent-soft-fg: #134e4a;
@@ -41,7 +44,21 @@
   --ml-neutral-fg: #303030;
   --ml-danger-bg: #fee2e2;
   --ml-danger-fg: #991b1b;
+  /* Deliberately not skipped by choice: a dose the parent has opted out of is
+     resolved, not outstanding, so it reads quiet rather than warning. */
+  --ml-skip-bg: #eceef0;
+  --ml-skip-fg: #5c6670;
 
+  /* Categorical, for grouping that is not status — milestone tiles. Muted so
+     six of them can sit together without shouting. */
+  --ml-cat-1-bg: #dbeafe; --ml-cat-1-fg: #1e40af;
+  --ml-cat-2-bg: #ede9fe; --ml-cat-2-fg: #5b21b6;
+  --ml-cat-3-bg: #fce7f3; --ml-cat-3-fg: #9d174d;
+  --ml-cat-4-bg: #ffedd5; --ml-cat-4-fg: #9a3412;
+  --ml-cat-5-bg: #d1fae5; --ml-cat-5-fg: #065f46;
+  --ml-cat-6-bg: #fef3c7; --ml-cat-6-fg: #854d0e;
+
+  --ml-shadow-soft: 0 1px 2px rgba(26, 26, 26, 0.05), 0 2px 8px rgba(26, 26, 26, 0.05);
   --ml-shadow-card: 0 1px 0 rgba(26, 26, 26, 0.07);
   --ml-shadow-lift: 0 8px 24px rgba(26, 26, 26, 0.08);
   --ml-shadow-button: inset 0 -1px 0 rgba(0, 0, 0, 0.6);
@@ -74,6 +91,7 @@
   --ml-line-strong: #4a4a4a;
 
   --ml-accent: #2dd4bf;
+  --ml-accent-fg: #06312b;
   --ml-accent-strong: #5eead4;
   --ml-accent-soft: #134e4a;
   --ml-accent-soft-fg: #99f6e4;
@@ -92,7 +110,17 @@
   --ml-neutral-fg: #f1f1f1;
   --ml-danger-bg: #450a0a;
   --ml-danger-fg: #fecaca;
+  --ml-skip-bg: #2b3036;
+  --ml-skip-fg: #9aa4ae;
 
+  --ml-cat-1-bg: #17294d; --ml-cat-1-fg: #bfdbfe;
+  --ml-cat-2-bg: #2a1d4d; --ml-cat-2-fg: #ddd6fe;
+  --ml-cat-3-bg: #431430; --ml-cat-3-fg: #fbcfe8;
+  --ml-cat-4-bg: #43230e; --ml-cat-4-fg: #fed7aa;
+  --ml-cat-5-bg: #0c322a; --ml-cat-5-fg: #a7f3d0;
+  --ml-cat-6-bg: #3a2c0a; --ml-cat-6-fg: #fde68a;
+
+  --ml-shadow-soft: 0 1px 2px rgba(0, 0, 0, 0.4), 0 2px 8px rgba(0, 0, 0, 0.35);
   --ml-shadow-card: 0 1px 0 rgba(0, 0, 0, 0.5);
   --ml-shadow-lift: 0 8px 24px rgba(0, 0, 0, 0.4);
   --ml-shadow-button: inset 0 -1px 0 rgba(0, 0, 0, 0.8);
@@ -123,6 +151,7 @@
   --color-line-strong: var(--ml-line-strong);
 
   --color-accent: var(--ml-accent);
+  --color-accent-fg: var(--ml-accent-fg);
   --color-accent-strong: var(--ml-accent-strong);
   --color-accent-soft: var(--ml-accent-soft);
   --color-accent-soft-fg: var(--ml-accent-soft-fg);
@@ -141,6 +170,21 @@
   --color-neutral-fg: var(--ml-neutral-fg);
   --color-danger-bg: var(--ml-danger-bg);
   --color-danger-fg: var(--ml-danger-fg);
+  --color-skip-bg: var(--ml-skip-bg);
+  --color-skip-fg: var(--ml-skip-fg);
+
+  --color-cat-1-bg: var(--ml-cat-1-bg);
+  --color-cat-1-fg: var(--ml-cat-1-fg);
+  --color-cat-2-bg: var(--ml-cat-2-bg);
+  --color-cat-2-fg: var(--ml-cat-2-fg);
+  --color-cat-3-bg: var(--ml-cat-3-bg);
+  --color-cat-3-fg: var(--ml-cat-3-fg);
+  --color-cat-4-bg: var(--ml-cat-4-bg);
+  --color-cat-4-fg: var(--ml-cat-4-fg);
+  --color-cat-5-bg: var(--ml-cat-5-bg);
+  --color-cat-5-fg: var(--ml-cat-5-fg);
+  --color-cat-6-bg: var(--ml-cat-6-bg);
+  --color-cat-6-fg: var(--ml-cat-6-fg);
 
   --color-series-1: var(--ml-series-1);
   --color-series-2: var(--ml-series-2);
@@ -159,6 +203,7 @@
   --radius-tile: 10px;
 
   /* Elevation */
+  --shadow-soft: var(--ml-shadow-soft);
   --shadow-card: var(--ml-shadow-card);
   --shadow-lift: var(--ml-shadow-lift);
   --shadow-button: var(--ml-shadow-button);

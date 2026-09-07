@@ -5,7 +5,9 @@ import { calculateAge, getDaysUntilVaccine, calculateVaccineDueDate } from './ag
 /**
  * Get vaccine status and details for a baby
  * @param {string} dob - Date of birth
- * @param {Object} completedVaccines - Object with vaccine keys as true/false
+ * @param {Object} completedVaccines - Vaccine keys mapped to `true` (given),
+ *   `'skipped'` (opted out of), or absent/false (still outstanding). The string
+ *   is additive, so records written before skipping existed still read correctly.
  * @param {Array} schedule - Vaccine schedule to use (defaults to BD_EPI_SCHEDULE)
  * @returns {Array} Array of vaccine objects with status
  */
@@ -18,7 +20,9 @@ export const getVaccineStatus = (dob, completedVaccines = {}, schedule = BD_EPI_
   const currentDays = age.totalDays;
 
   return schedule.map(vaccine => {
-    const isCompleted = completedVaccines[vaccine.key] === true;
+    const record = completedVaccines[vaccine.key];
+    const isCompleted = record === true;
+    const isSkipped = record === VACCINE_STATUS.SKIPPED;
     const daysUntil = getDaysUntilVaccine(dob, vaccine.day);
     const dueDate = calculateVaccineDueDate(dob, vaccine.day);
 
@@ -28,6 +32,9 @@ export const getVaccineStatus = (dob, completedVaccines = {}, schedule = BD_EPI_
     if (isCompleted) {
       status = VACCINE_STATUS.COMPLETED;
       statusMessage = 'Completed';
+    } else if (isSkipped) {
+      status = VACCINE_STATUS.SKIPPED;
+      statusMessage = 'Skipped';
     } else if (daysUntil < 0) {
       // Overdue
       status = VACCINE_STATUS.OVERDUE;
@@ -59,6 +66,7 @@ export const getVaccineStatus = (dob, completedVaccines = {}, schedule = BD_EPI_
       dueDate,
       daysUntil,
       isCompleted,
+      isSkipped,
       isPast: currentDays >= vaccine.day
     };
   });
@@ -68,13 +76,17 @@ export const getVaccineStatus = (dob, completedVaccines = {}, schedule = BD_EPI_
  * Get progress summary
  */
 export const getVaccineProgress = (vaccines) => {
-  const total = vaccines.length;
+  // A skipped dose is resolved, not outstanding, so it leaves the denominator
+  // entirely — otherwise opting out would permanently cap progress below 100%.
+  const skipped = vaccines.filter(v => v.isSkipped).length;
+  const total = vaccines.length - skipped;
   const completed = vaccines.filter(v => v.isCompleted).length;
   const percentage = total > 0 ? Math.round((completed / total) * 100) : 0;
 
   return {
     total,
     completed,
+    skipped,
     remaining: total - completed,
     percentage
   };
@@ -85,7 +97,7 @@ export const getVaccineProgress = (vaccines) => {
  */
 export const getNextVaccine = (vaccines) => {
   const upcoming = vaccines
-    .filter(v => !v.isCompleted && v.status !== VACCINE_STATUS.OVERDUE)
+    .filter(v => !v.isCompleted && !v.isSkipped && v.status !== VACCINE_STATUS.OVERDUE)
     .sort((a, b) => a.daysUntil - b.daysUntil);
 
   return upcoming[0] || null;
@@ -116,7 +128,10 @@ export const getVaccinationStage = (vaccines) => {
  * Get private vaccine status for a baby
  */
 export const getPrivateVaccineStatus = (dob, completedVaccines = {}) => {
-  return getVaccineStatus(dob, completedVaccines, PRIVATE_VACCINE_SCHEDULE);
+  // The private schedule is recommendation rather than programme, so every
+  // dose on it can be opted out of. EPI doses cannot.
+  return getVaccineStatus(dob, completedVaccines, PRIVATE_VACCINE_SCHEDULE)
+    .map(vaccine => ({ ...vaccine, optional: true }));
 };
 
 /**
@@ -128,7 +143,8 @@ export const getCombinedProgress = (epiVaccines, privateVaccines) => {
 
   const total = epi.total + pvt.total;
   const completed = epi.completed + pvt.completed;
+  const skipped = epi.skipped + pvt.skipped;
   const percentage = total > 0 ? Math.round((completed / total) * 100) : 0;
 
-  return { total, completed, remaining: total - completed, percentage };
+  return { total, completed, skipped, remaining: total - completed, percentage };
 };

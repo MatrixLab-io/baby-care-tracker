@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeftIcon } from '@heroicons/react/24/outline';
+import { ArrowLeftIcon, HomeIcon } from '@heroicons/react/24/outline';
 import Logo from './ui/Logo';
 import ThemeToggle from './ui/ThemeToggle';
 import PrivacyNotice from './PrivacyNotice';
@@ -18,6 +18,7 @@ const Header = ({
   showWhatsNew = true,
   showPrivacy = true,
   showUser = true,
+  showHome = true,
 }) => {
   const navigate = useNavigate();
 
@@ -40,6 +41,17 @@ const Header = ({
 
         <div className="flex items-center gap-2">
           {rightContent}
+          {showHome && (
+            <button
+              type="button"
+              onClick={() => navigate('/welcome')}
+              className="btn btn-secondary btn-sm w-9 px-0"
+              aria-label="About MyBabyCare"
+              title="About MyBabyCare"
+            >
+              <HomeIcon className="w-[18px] h-[18px]" aria-hidden="true" />
+            </button>
+          )}
           {showWhatsNew && <WhatsNew />}
           {showPrivacy && <PrivacyNotice />}
           <ThemeToggle />

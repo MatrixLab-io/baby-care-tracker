@@ -8,6 +8,7 @@ import Home from './pages/Home';
 import AddEditBaby from './pages/AddEditBaby';
 import Dashboard from './pages/Dashboard';
 import SharedView from './pages/SharedView';
+import Landing from './pages/Landing';
 import FeedbackButton from './components/FeedbackButton';
 import UpdateNotification from './components/UpdateNotification';
 
@@ -21,6 +22,7 @@ function App() {
             <Route path="/auth" element={<AuthPage />} />
             <Route path="/auth/verify" element={<EmailVerifyPage />} />
             <Route path="/share" element={<SharedView />} />
+            <Route path="/welcome" element={<Landing />} />
 
             {/* Protected routes - share one BabyProvider */}
             <Route element={<ProtectedLayout />}>

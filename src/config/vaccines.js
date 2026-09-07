@@ -2,7 +2,8 @@ import {
   CalendarDaysIcon,
   CheckCircleIcon,
   ClockIcon,
-  ExclamationTriangleIcon
+  ExclamationTriangleIcon,
+  MinusCircleIcon
 } from '@heroicons/react/24/outline';
 
 // Bangladesh EPI Vaccine Schedule
@@ -63,7 +64,11 @@ export const VACCINE_STATUS = {
   COMPLETED: 'completed',
   DUE: 'due',
   UPCOMING: 'upcoming',
-  OVERDUE: 'overdue'
+  OVERDUE: 'overdue',
+  // Chosen not to give. Only offered on the private schedule — several of
+  // those doses are alternatives to each other (RotaTeq is three doses,
+  // Rotarix is two), so a parent legitimately opts out of some.
+  SKIPPED: 'skipped'
 };
 
 // Status presentation. Tones map onto the design system's badge classes, so a
@@ -72,7 +77,8 @@ export const STATUS_TONES = {
   [VACCINE_STATUS.COMPLETED]: 'live',
   [VACCINE_STATUS.DUE]: 'new',
   [VACCINE_STATUS.UPCOMING]: 'soon',
-  [VACCINE_STATUS.OVERDUE]: 'danger'
+  [VACCINE_STATUS.OVERDUE]: 'danger',
+  [VACCINE_STATUS.SKIPPED]: 'skip'
 };
 
 // Heroicons outline, never emoji.
@@ -80,5 +86,6 @@ export const STATUS_ICONS = {
   [VACCINE_STATUS.COMPLETED]: CheckCircleIcon,
   [VACCINE_STATUS.DUE]: ClockIcon,
   [VACCINE_STATUS.UPCOMING]: CalendarDaysIcon,
-  [VACCINE_STATUS.OVERDUE]: ExclamationTriangleIcon
+  [VACCINE_STATUS.OVERDUE]: ExclamationTriangleIcon,
+  [VACCINE_STATUS.SKIPPED]: MinusCircleIcon
 };

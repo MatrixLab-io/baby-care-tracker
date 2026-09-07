@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import {
   ArrowDownTrayIcon,
   ArrowLeftIcon,
+  CakeIcon,
   ChartBarIcon,
   CheckIcon,
   DocumentIcon,
@@ -56,7 +57,8 @@ const formatFileSize = (bytes) => {
 
 const Dashboard = () => {
   const navigate = useNavigate();
-  const { currentBaby, babies, switchBaby, toggleVaccineStatus, deleteMedicalRecord, loading } = useBaby();
+  const { currentBaby, babies, switchBaby, toggleVaccineStatus, setVaccineState, deleteMedicalRecord, loading } =
+    useBaby();
   const [activeTab, setActiveTab] = useState('vaccines');
   const [loadingVaccineKey, setLoadingVaccineKey] = useState(null);
   const [shareCopied, setShareCopied] = useState(false);
@@ -157,6 +159,15 @@ const Dashboard = () => {
     }
   };
 
+  const handleVaccineSkip = async (vaccineKey, state) => {
+    setLoadingVaccineKey(vaccineKey);
+    try {
+      await setVaccineState(vaccineKey, state);
+    } finally {
+      setLoadingVaccineKey(null);
+    }
+  };
+
   const medicalRecords = currentBaby.medicalRecords || [];
 
   return (
@@ -199,16 +210,28 @@ const Dashboard = () => {
             </div>
 
             {age && (
-              <div className="grid gap-2 sm:grid-cols-2 mt-4">
-                <div className="stat">
-                  <p className="stat-label">Age</p>
-                  <p className="stat-value">{age.formatted}</p>
+              <div className="mt-4 flex flex-col gap-2">
+                <div className="stat stat-lift flex items-center gap-3">
+                  <span className="icon-tile w-10 h-10 shrink-0 bg-accent-soft text-accent-soft-fg">
+                    <CakeIcon className="w-5 h-5" aria-hidden="true" />
+                  </span>
+                  <div className="min-w-0">
+                    <p className="stat-label">Age today</p>
+                    <p className="text-[17px] font-bold text-ink leading-tight">{age.formatted}</p>
+                  </div>
                 </div>
-                <div className="stat">
-                  <p className="stat-label">In numbers</p>
-                  <p className="stat-value">
-                    {age.totalDays} days · {age.totalWeeks} weeks · {age.totalMonths} months
-                  </p>
+
+                <div className="grid grid-cols-3 gap-2">
+                  {[
+                    { label: 'days', value: age.totalDays },
+                    { label: 'weeks', value: age.totalWeeks },
+                    { label: 'months', value: age.totalMonths },
+                  ].map((unit) => (
+                    <div key={unit.label} className="stat stat-lift text-center">
+                      <p className="text-[19px] font-bold text-ink leading-none tabular-nums">{unit.value}</p>
+                      <p className="stat-label mt-1">{unit.label}</p>
+                    </div>
+                  ))}
                 </div>
               </div>
             )}
@@ -234,6 +257,9 @@ const Dashboard = () => {
               <Badge tone="danger">
                 {overdueCount} vaccine{overdueCount > 1 ? 's' : ''} overdue
               </Badge>
+            )}
+            {combinedProgress.skipped > 0 && (
+              <Badge tone="skip">{combinedProgress.skipped} skipped</Badge>
             )}
           </div>
         </div>
@@ -286,7 +312,7 @@ const Dashboard = () => {
             <SectionHeader
               as="h2"
               title="Private vaccination schedule"
-              lead={`Additional recommended vaccines — ${privateProgress.completed} of ${privateProgress.total} given.`}
+              lead={`Recommended alongside EPI. Skip any dose your clinic is not giving. ${privateProgress.completed} of ${privateProgress.total} given.`}
               aside={<Badge tone="accent">Private</Badge>}
             />
             <div className="card row-divider">
@@ -295,6 +321,7 @@ const Dashboard = () => {
                   key={vaccine.key}
                   vaccine={vaccine}
                   onToggle={handleVaccineToggle}
+                  onSkip={handleVaccineSkip}
                   isLoading={loadingVaccineKey === vaccine.key}
                 />
               ))}
@@ -390,7 +417,7 @@ const Dashboard = () => {
       {overdueCount > 0 && activeTab === 'vaccines' && (
         <p className="flex items-center gap-2 text-[13px] text-ink-2 mt-4">
           <ExclamationTriangleIcon className="w-4 h-4 text-danger-fg" aria-hidden="true" />
-          Overdue doses are still worth giving — ask your clinic about catch-up.
+          Overdue doses are still worth giving. Ask your clinic about catching up.
         </p>
       )}
     </AppShell>

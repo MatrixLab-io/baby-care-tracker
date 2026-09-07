@@ -58,8 +58,10 @@
   .btn-secondary {
     @apply bg-surface text-ink border border-line-strong hover:bg-surface-2;
   }
+  /* text-accent-fg, not white: in dark mode the accent is bright teal and
+     white text on it fails contrast. */
   .btn-accent {
-    @apply bg-accent text-white hover:bg-accent-strong;
+    @apply bg-accent text-accent-fg hover:bg-accent-strong;
   }
   .btn-plain {
     @apply text-link hover:text-link-hover px-0 h-auto;
@@ -87,6 +89,7 @@
   .badge-accent { @apply bg-accent-soft text-accent-soft-fg; }
   .badge-inverse { @apply bg-surface-inverse text-ink-inverse; }
   .badge-danger { @apply bg-danger-bg text-danger-fg; }
+  .badge-skip { @apply bg-skip-bg text-skip-fg; }
 
   /* --- Chips (selectable pills) ------------------------------------------- */
   .chip {
@@ -220,7 +223,10 @@
 
   /* --- Stat (age, counts) ------------------------------------------------- */
   .stat {
-    @apply rounded-control border border-line bg-surface-2 px-3 py-2;
+    @apply rounded-card border border-line bg-surface px-3.5 py-3 shadow-soft transition-[box-shadow,border-color,translate] duration-200;
+  }
+  .stat-lift:hover {
+    @apply -translate-y-0.5 shadow-lift border-line-strong;
   }
   .stat-label {
     @apply text-xs font-medium text-ink-2;
@@ -228,4 +234,15 @@
   .stat-value {
     @apply text-[15px] font-semibold text-ink;
   }
+}
+
+@layer utilities {
+  /* Categorical tile tints for grouping that is not status (milestones).
+     Utilities, so they override .icon-tile's own background. */
+  .tile-cat-1 { background-color: var(--ml-cat-1-bg); color: var(--ml-cat-1-fg); }
+  .tile-cat-2 { background-color: var(--ml-cat-2-bg); color: var(--ml-cat-2-fg); }
+  .tile-cat-3 { background-color: var(--ml-cat-3-bg); color: var(--ml-cat-3-fg); }
+  .tile-cat-4 { background-color: var(--ml-cat-4-bg); color: var(--ml-cat-4-fg); }
+  .tile-cat-5 { background-color: var(--ml-cat-5-bg); color: var(--ml-cat-5-fg); }
+  .tile-cat-6 { background-color: var(--ml-cat-6-bg); color: var(--ml-cat-6-fg); }
 }

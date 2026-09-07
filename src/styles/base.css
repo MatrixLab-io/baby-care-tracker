@@ -40,7 +40,7 @@
 
   ::selection {
     background: var(--ml-accent);
-    color: #ffffff;
+    color: var(--ml-accent-fg);
   }
 
   ::-webkit-scrollbar { width: 8px; }

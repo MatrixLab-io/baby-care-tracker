@@ -143,16 +143,35 @@ export const deleteBaby = async (babyId) => {
 };
 
 /**
- * Toggle vaccine status
+ * Set a vaccine to 'given', 'skipped' or 'pending'.
+ * Stored as `true` / `'skipped'` / removed, so documents written before
+ * skipping existed keep working with no migration.
+ */
+export const setVaccineState = async (babyId, vaccineKey, state) => {
+  const baby = await getBabyById(babyId);
+  if (!baby) return null;
+
+  const vaccines = { ...baby.vaccines };
+  if (state === 'given') {
+    vaccines[vaccineKey] = true;
+  } else if (state === 'skipped') {
+    vaccines[vaccineKey] = 'skipped';
+  } else {
+    delete vaccines[vaccineKey];
+  }
+
+  return updateBaby(babyId, { vaccines });
+};
+
+/**
+ * Toggle a vaccine between given and pending.
  */
 export const toggleVaccine = async (babyId, vaccineKey) => {
   const baby = await getBabyById(babyId);
   if (!baby) return null;
 
-  const vaccines = { ...baby.vaccines };
-  vaccines[vaccineKey] = !vaccines[vaccineKey];
-
-  return updateBaby(babyId, { vaccines });
+  const isGiven = baby.vaccines?.[vaccineKey] === true;
+  return setVaccineState(babyId, vaccineKey, isGiven ? 'pending' : 'given');
 };
 
 /**

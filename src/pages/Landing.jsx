@@ -9,6 +9,7 @@ import {
   ShieldCheckIcon,
   TrophyIcon,
 } from '@heroicons/react/24/outline';
+import { useAuth } from '../context/AuthContext';
 import { getVaccineStatus, getPrivateVaccineStatus } from '../utils/vaccineEngine';
 import { BD_EPI_SCHEDULE, STATUS_TONES } from '../config/vaccines';
 import { PRIVATE_VACCINE_SCHEDULE } from '../config/privateVaccines';
@@ -68,6 +69,7 @@ const PRIVACY = [
 
 const Landing = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [dob, setDob] = useState(defaultDob);
 
   // The hero is the product working: one date in, the real schedule out.
@@ -78,7 +80,11 @@ const Landing = () => {
       .slice(0, 6);
   }, [dob]);
 
-  const signIn = () => navigate('/auth');
+  // Signed-in visitors reach this page from the header, so send them back to
+  // their own records rather than offering a sign-in they already have.
+  const signedIn = Boolean(user);
+  const ctaLabel = signedIn ? 'Open my records' : 'Sign in';
+  const goToApp = () => navigate(signedIn ? '/' : '/auth');
 
   return (
     <div className="min-h-screen flex flex-col bg-ground">
@@ -86,9 +92,10 @@ const Landing = () => {
         showPrivacy={false}
         showUser={false}
         showWhatsNew={false}
+        showHome={false}
         rightContent={
-          <Button size="sm" onClick={signIn}>
-            Sign in
+          <Button size="sm" onClick={goToApp}>
+            {ctaLabel}
           </Button>
         }
       />
@@ -120,8 +127,8 @@ const Landing = () => {
                 help="Try any date. Nothing here is saved."
                 className="sm:w-64"
               />
-              <Button size="lg" icon={ArrowRightIcon} onClick={signIn} className="sm:mb-6">
-                Sign in to start
+              <Button size="lg" icon={ArrowRightIcon} onClick={goToApp} className="sm:mb-6">
+                {signedIn ? 'Open my records' : 'Sign in to start'}
               </Button>
             </div>
           </div>
@@ -243,14 +250,17 @@ const Landing = () => {
           </div>
 
           <Card inverse className="flex flex-col gap-4 p-6 sm:p-8">
-            <h2 className="text-2xl font-bold">Start your child&rsquo;s record</h2>
+            <h2 className="text-2xl font-bold">
+              {signedIn ? 'Back to your records' : "Start your child's record"}
+            </h2>
             <p className="text-[15px] leading-relaxed text-ink-inverse-2">
-              Sign in with Google or an emailed link. Add a name and a date of birth, and the schedule is
-              ready before you put the phone down.
+              {signedIn
+                ? 'Your schedules, growth and documents are where you left them.'
+                : 'Sign in with Google or an emailed link. Add a name and a date of birth, and the schedule is ready before you put the phone down.'}
             </p>
             <div className="pt-1">
-              <Button variant="on-inverse" size="lg" onClick={signIn}>
-                Sign in
+              <Button variant="on-inverse" size="lg" onClick={goToApp}>
+                {ctaLabel}
               </Button>
             </div>
           </Card>
