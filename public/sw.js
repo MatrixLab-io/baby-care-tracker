@@ -34,12 +34,17 @@ self.addEventListener('install', (event) => {
 
 self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches
-      .keys()
-      .then((names) =>
-        Promise.all(names.filter((name) => name !== CACHE_NAME).map((name) => caches.delete(name)))
-      )
-      .then(() => self.clients.claim())
+    (async () => {
+      // Claim before cleaning up, not after. Upgrading from the pre-1.6.1
+      // worker, the old page asks us to activate and then reloads immediately;
+      // whichever worker controls at that moment serves the navigation. Waiting
+      // on cache deletion first widened that window and the old, cache-first
+      // worker answered — which is why that one upgrade appeared to do nothing.
+      await self.clients.claim();
+
+      const names = await caches.keys();
+      await Promise.all(names.filter((name) => name !== CACHE_NAME).map((name) => caches.delete(name)));
+    })()
   );
 });
 
