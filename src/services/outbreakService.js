@@ -15,7 +15,11 @@ const CRITICAL_ALERTS = [
   }
 ];
 
-const RELIEFWEB_API = 'https://api.reliefweb.int/v1/reports';
+// v1 was decommissioned and answers 410 to everything, including the CORS
+// preflight — which is why this surfaced in the browser as a CORS error rather
+// than a version error. v2 additionally requires a registered appname.
+const RELIEFWEB_API = 'https://api.reliefweb.int/v2/reports';
+const APPNAME = 'matrixlab-mybabycare-7f3a2c';
 
 // Cache outbreak data for 1 hour
 let cachedOutbreaks = null;
@@ -27,7 +31,7 @@ const CACHE_DURATION = 60 * 60 * 1000; // 1 hour
  */
 const fetchFromReliefWeb = async () => {
   const body = {
-    appname: 'baby-care-tracker',
+    appname: APPNAME,
     filter: {
       operator: 'AND',
       conditions: [
@@ -40,13 +44,13 @@ const fetchFromReliefWeb = async () => {
       ]
     },
     fields: {
-      include: ['title', 'date.created', 'url_alias', 'source.name', 'theme.name']
+      include: ['title', 'date.created', 'url_alias', 'source.name']
     },
     sort: ['date.created:desc'],
     limit: 10
   };
 
-  const response = await fetch(RELIEFWEB_API, {
+  const response = await fetch(`${RELIEFWEB_API}?appname=${APPNAME}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body)
@@ -68,8 +72,10 @@ const fetchFromReliefWeb = async () => {
       title,
       summary: '',
       severity: diseaseMatches.length > 0 ? 'warning' : 'info',
-      date: fields['date.created'] || '',
-      source: fields['source.name'] || 'ReliefWeb',
+      // v2 nests what v1 returned as flat dotted keys, and returns source as
+      // a list. Reading the old shape here yielded blank dates and sources.
+      date: fields.date?.created || '',
+      source: fields.source?.[0]?.name || 'ReliefWeb',
       region: 'Bangladesh',
       diseases: diseaseMatches.map(m => m.disease),
       url: fields.url_alias || '',
