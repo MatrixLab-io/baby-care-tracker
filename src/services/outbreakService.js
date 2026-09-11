@@ -1,20 +1,5 @@
 import { matchOutbreakToDiseases } from '../config/outbreakVaccineMap';
 
-// Critical hardcoded alerts for immediate threats
-const CRITICAL_ALERTS = [
-  {
-    id: 'bd-measles-2026',
-    title: 'Measles Outbreak in Bangladesh',
-    summary: 'A significant measles outbreak has been reported across multiple districts in Bangladesh. Health authorities urge parents to ensure children are vaccinated with MR/MMR vaccines on schedule.',
-    severity: 'critical',
-    date: '2026-03-15',
-    source: 'DGHS Bangladesh',
-    region: 'Bangladesh',
-    diseases: ['measles'],
-    isHardcoded: true
-  }
-];
-
 // v1 was decommissioned and answers 410 to everything, including the CORS
 // preflight — which is why this surfaced in the browser as a CORS error rather
 // than a version error. v2 additionally requires a registered appname.
@@ -78,38 +63,32 @@ const fetchFromReliefWeb = async () => {
       source: fields.source?.[0]?.name || 'ReliefWeb',
       region: 'Bangladesh',
       diseases: diseaseMatches.map(m => m.disease),
-      url: fields.url_alias || '',
-      isHardcoded: false
+      url: fields.url_alias || ''
     };
   });
 };
 
 /**
- * Get all outbreak alerts (hardcoded + API)
- * Filters to only return health-relevant alerts with disease matches
+ * Reported outbreaks that match a vaccine on one of the schedules. Everything
+ * shown here comes from ReliefWeb; if the feed is unreachable the section
+ * simply stays empty, which is the honest answer to "we do not know".
  */
 export const getOutbreakAlerts = async () => {
-  // Start with critical hardcoded alerts
-  const alerts = [...CRITICAL_ALERTS];
-
-  // Check cache
   const now = Date.now();
   if (cachedOutbreaks && (now - cacheTimestamp) < CACHE_DURATION) {
-    return deduplicateAlerts([...alerts, ...cachedOutbreaks]);
+    return deduplicateAlerts(cachedOutbreaks);
   }
 
-  // Fetch from API
   try {
     const apiAlerts = await fetchFromReliefWeb();
     // Only keep alerts that matched a known disease
     const relevantAlerts = apiAlerts.filter(a => a.diseases.length > 0);
     cachedOutbreaks = relevantAlerts;
     cacheTimestamp = now;
-    return deduplicateAlerts([...alerts, ...relevantAlerts]);
+    return deduplicateAlerts(relevantAlerts);
   } catch (error) {
     console.warn('Failed to fetch outbreak data from ReliefWeb:', error.message);
-    // Return hardcoded alerts on failure
-    return alerts;
+    return [];
   }
 };
 
@@ -119,7 +98,7 @@ export const getOutbreakAlerts = async () => {
 const deduplicateAlerts = (alerts) => {
   const seen = new Set();
   return alerts.filter(alert => {
-    const key = alert.isHardcoded ? alert.id : `${alert.diseases.sort().join(',')}-${alert.date.slice(0, 7)}`;
+    const key = `${alert.diseases.sort().join(',')}-${alert.date.slice(0, 7)}`;
     if (seen.has(key)) return false;
     seen.add(key);
     return true;

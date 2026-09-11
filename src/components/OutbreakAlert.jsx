@@ -109,16 +109,14 @@ const OutbreakAlert = ({ completedVaccines = {} }) => {
               alert.severity === 'critical' ? 'motion-pulse-soft' : ''
             }`}
           >
-            {!alert.isHardcoded && (
-              <button
-                type="button"
-                onClick={() => handleDismiss(alert.id)}
-                className={`absolute top-3 right-3 btn-icon ${tone.text} hover:bg-black/5 dark:hover:bg-white/10`}
-                aria-label="Dismiss alert"
-              >
-                <XMarkIcon className="w-[18px] h-[18px]" aria-hidden="true" />
-              </button>
-            )}
+            <button
+              type="button"
+              onClick={() => handleDismiss(alert.id)}
+              className={`absolute top-3 right-3 btn-icon ${tone.text} hover:bg-black/5 dark:hover:bg-white/10`}
+              aria-label="Dismiss alert"
+            >
+              <XMarkIcon className="w-[18px] h-[18px]" aria-hidden="true" />
+            </button>
 
             <div className="flex items-start gap-3">
               <span className={`icon-tile w-10 h-10 shrink-0 ${tone.well}`}>
