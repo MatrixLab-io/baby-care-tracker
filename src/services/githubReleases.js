@@ -21,7 +21,7 @@ export const formatReleaseDate = (iso) =>
   iso ? new Date(iso).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : '';
 
 /**
- * Changelog categories. The badge follows the "## …" heading the item sits
+ * Changelog categories. The badge follows the "## …" heading an item sits
  * under, so whoever writes the notes controls it: "## Fixes", "## New",
  * "## Improvements". Wording that plainly describes a repair wins over the
  * section, since fixes often get filed under a general "What's New".
@@ -31,64 +31,93 @@ const SECTIONS = [
   { test: /new|feature|add/i, label: 'New', tone: 'live' },
   { test: /improve|updat|change|enhanc/i, label: 'Update', tone: 'soon' },
 ];
-const FIX_WORDING = /\bno longer\b|\bfixed?\b|\bwas broken\b|\bstopped\b|\binstead of failing\b/i;
+const FIX_WORDING = /\bno longer\b|\bfixed?\b|\bwas broken\b|\bstopped\b/i;
 const UPDATE = { label: 'Update', tone: 'soon' };
 
 const sectionCategory = (heading) => SECTIONS.find((c) => c.test.test(heading)) || UPDATE;
+const categorise = (heading, section) => (FIX_WORDING.test(heading) ? SECTIONS[0] : section);
 
-const categorise = (heading, section) =>
-  FIX_WORDING.test(heading) ? SECTIONS[0] : section;
+/**
+ * Enough Markdown for GitHub release notes: bullet lists and paragraphs.
+ * Headings are consumed by the section split above this, not returned here.
+ */
+const parseBlocks = (lines) => {
+  const blocks = [];
+  let listItems = [];
 
-/** First sentence of a paragraph, so a summary line stays one line. */
-const firstSentence = (text) => {
-  const [sentence] = text.split(/(?<=\.)\s/);
-  return sentence.length > 110 ? `${sentence.slice(0, 107).trimEnd()}…` : sentence;
+  const flushList = () => {
+    if (listItems.length > 0) {
+      blocks.push({ type: 'list', items: [...listItems] });
+      listItems = [];
+    }
+  };
+
+  for (const raw of lines) {
+    const line = raw.trim();
+    if (!line) {
+      flushList();
+    } else if (line.startsWith('- ') || line.startsWith('* ')) {
+      listItems.push(line.slice(2));
+    } else {
+      flushList();
+      blocks.push({ type: 'p', text: line });
+    }
+  }
+  flushList();
+
+  return blocks;
 };
 
 /**
- * One line per change, for the What's New dialog. The "###" sub-headings are
- * already written as short human-readable summaries, so they become the lines.
- * Notes without them fall back to their bullets, then to the opening sentence —
- * never to the "##" heading itself, which is too generic to be a summary.
- * Full detail lives on the changelog page.
+ * Release notes as a list of changes: a badge, a heading, and the body under
+ * it. Both the What's New dialog and the changelog render from this, so they
+ * stay structurally identical — the dialog trims each body, the changelog
+ * shows all of it.
  */
-export const summariseRelease = (body, limit = 4) => {
+export const parseReleaseSections = (body) => {
   if (!body) return [];
 
-  const lines = [];
+  const sections = [];
   let section = UPDATE;
+  let current = null;
+
+  const close = () => {
+    if (current) {
+      current.blocks = parseBlocks(current.lines);
+      delete current.lines;
+      sections.push(current);
+      current = null;
+    }
+  };
 
   for (const raw of body.split('\n')) {
     const line = raw.trim();
 
     if (line.startsWith('## ')) {
+      close();
       section = sectionCategory(line.slice(3));
     } else if (line.startsWith('### ')) {
-      lines.push({ ...categorise(line.slice(4), section), text: line.slice(4) });
+      close();
+      const heading = line.slice(4);
+      current = { ...categorise(heading, section), heading, lines: [] };
+    } else if (current) {
+      current.lines.push(raw);
+    } else if (line && !line.startsWith('#')) {
+      // Notes written without sub-headings still have something to say.
+      current = { ...section, heading: null, lines: [raw] };
     }
   }
+  close();
 
-  if (lines.length === 0) {
-    for (const raw of body.split('\n')) {
-      const line = raw.trim();
-      if (line.startsWith('## ')) {
-        section = sectionCategory(line.slice(3));
-      } else if (line.startsWith('- ') || line.startsWith('* ')) {
-        const text = line.slice(2);
-        lines.push({ ...categorise(text, section), text });
-      }
-    }
-  }
+  return sections;
+};
 
-  if (lines.length === 0) {
-    for (const raw of body.split('\n')) {
-      const line = raw.trim();
-      if (line && !line.startsWith('#')) {
-        lines.push({ ...categorise(line, section), text: firstSentence(line) });
-        break;
-      }
-    }
-  }
+/** One short line of body text, for the dialog. */
+export const sectionSummary = (section, maxChars = 150) => {
+  const paragraph = section.blocks.find((b) => b.type === 'p');
+  const list = section.blocks.find((b) => b.type === 'list');
+  const text = paragraph?.text || list?.items[0] || '';
 
-  return lines.slice(0, limit);
+  if (text.length <= maxChars) return text;
+  return `${text.slice(0, maxChars - 1).trimEnd()}…`;
 };

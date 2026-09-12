@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowRightIcon, SparklesIcon } from '@heroicons/react/24/outline';
-import { fetchReleases, formatReleaseDate, summariseRelease } from '../services/githubReleases';
+import { fetchReleases, formatReleaseDate, parseReleaseSections, sectionSummary } from '../services/githubReleases';
+import { ReleaseSummaryLine } from './ReleaseNotes';
 import Badge from './ui/Badge';
 import Button from './ui/Button';
 import Modal from './ui/Modal';
@@ -66,11 +67,11 @@ export default function WhatsNew() {
         {releases.length > 0 ? (
           <div className="flex flex-col gap-3">
             {releases.map((release, index) => {
-              const summary = summariseRelease(release.body);
+              const sections = parseReleaseSections(release.body).slice(0, 3);
 
               return (
                 <div key={release.id} className="rounded-control border border-line bg-surface-2 p-4">
-                  <div className="flex items-center justify-between gap-3 mb-2.5">
+                  <div className="flex items-center justify-between gap-3 mb-3">
                     <div className="flex items-center gap-1.5 min-w-0">
                       <span className="text-sm font-semibold text-ink truncate">
                         {release.name || release.tag_name}
@@ -80,14 +81,23 @@ export default function WhatsNew() {
                     <span className="text-xs text-ink-3 shrink-0">{formatReleaseDate(release.published_at)}</span>
                   </div>
 
-                  {summary.length > 0 ? (
-                    <ul className="flex flex-col gap-2">
-                      {summary.map((item, i) => (
-                        <li key={i} className="flex items-start gap-2">
-                          <Badge tone={item.tone} className="mt-px shrink-0">
-                            {item.label}
-                          </Badge>
-                          <span className="text-[13px] leading-snug text-ink-2">{item.text}</span>
+                  {sections.length > 0 ? (
+                    <ul className="flex flex-col gap-3">
+                      {sections.map((section, i) => (
+                        <li key={i} className="flex flex-col gap-1">
+                          <div className="flex items-start gap-2">
+                            <Badge tone={section.tone} className="mt-0.5 shrink-0">
+                              {section.label}
+                            </Badge>
+                            {section.heading && (
+                              <span className="text-[13px] font-semibold text-ink leading-snug">
+                                {section.heading}
+                              </span>
+                            )}
+                          </div>
+                          <div className="pl-[54px] -mt-0.5">
+                            <ReleaseSummaryLine text={sectionSummary(section)} />
+                          </div>
                         </li>
                       ))}
                     </ul>

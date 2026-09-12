@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { DocumentTextIcon } from '@heroicons/react/24/outline';
-import { fetchReleases, formatReleaseDate } from '../services/githubReleases';
+import { fetchReleases, formatReleaseDate, parseReleaseSections } from '../services/githubReleases';
 import AppShell from '../components/AppShell';
 import ReleaseNotes from '../components/ReleaseNotes';
 import Alert from '../components/ui/Alert';
@@ -26,9 +26,7 @@ const Changelog = () => {
     <AppShell header={HEADER}>
       <div className="flex flex-col gap-2 mb-7 max-w-xl">
         <h1 className="text-[30px] sm:text-[38px] font-bold leading-[1.05]">Changelog</h1>
-        <p className="text-[15px] text-ink-2">
-          Every release of MyBabyCare, newest first.
-        </p>
+        <p className="text-[15px] text-ink-2">Every release of MyBabyCare, newest first.</p>
       </div>
 
       {failed && (
@@ -65,21 +63,45 @@ const Changelog = () => {
 
       {!failed && releases?.length > 0 && (
         <div className="flex flex-col gap-4">
-          {releases.map((release, index) => (
-            <Card key={release.id} as="article">
-              <div className="flex flex-wrap items-center justify-between gap-2 mb-3 pb-3 border-b border-line">
-                <div className="flex items-center gap-2 min-w-0">
-                  <h2 className="text-[17px] font-bold text-ink truncate">
-                    {release.name || release.tag_name}
-                  </h2>
-                  {index === 0 && <Badge tone="accent">Latest</Badge>}
-                </div>
-                <span className="text-[13px] text-ink-2">{formatReleaseDate(release.published_at)}</span>
-              </div>
+          {releases.map((release, index) => {
+            const sections = parseReleaseSections(release.body);
 
-              <ReleaseNotes body={release.body} />
-            </Card>
-          ))}
+            return (
+              <Card key={release.id} as="article">
+                <div className="flex flex-wrap items-center justify-between gap-2 mb-4 pb-3 border-b border-line">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <h2 className="text-[17px] font-bold text-ink truncate">
+                      {release.name || release.tag_name}
+                    </h2>
+                    {index === 0 && <Badge tone="accent">Latest</Badge>}
+                  </div>
+                  <span className="text-[13px] text-ink-2">{formatReleaseDate(release.published_at)}</span>
+                </div>
+
+                {sections.length > 0 ? (
+                  <div className="flex flex-col gap-5">
+                    {sections.map((section, i) => (
+                      <div key={i} className="flex flex-col gap-2">
+                        <div className="flex items-start gap-2">
+                          <Badge tone={section.tone} className="mt-0.5 shrink-0">
+                            {section.label}
+                          </Badge>
+                          {section.heading && (
+                            <h3 className="text-sm font-semibold text-ink leading-snug">{section.heading}</h3>
+                          )}
+                        </div>
+                        <div className="sm:pl-[54px]">
+                          <ReleaseNotes blocks={section.blocks} />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-[13px] text-ink-3">No release notes.</p>
+                )}
+              </Card>
+            );
+          })}
         </div>
       )}
     </AppShell>
