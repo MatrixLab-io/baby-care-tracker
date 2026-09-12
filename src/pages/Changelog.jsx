@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { DocumentTextIcon } from '@heroicons/react/24/outline';
-import { fetchReleases, formatReleaseDate, parseReleaseSections } from '../services/githubReleases';
+import { fetchReleases, formatReleaseDate, parseReleaseSections, sectionBullets } from '../services/githubReleases';
 import AppShell from '../components/AppShell';
 import ReleaseNotes from '../components/ReleaseNotes';
 import Alert from '../components/ui/Alert';
@@ -91,7 +91,7 @@ const Changelog = () => {
                           )}
                         </div>
                         <div className={section.heading ? 'sm:pl-[54px]' : ''}>
-                          <ReleaseNotes blocks={section.blocks} />
+                          <ReleaseNotes items={sectionBullets(section)} />
                         </div>
                       </div>
                     ))}

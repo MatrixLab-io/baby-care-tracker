@@ -112,12 +112,38 @@ export const parseReleaseSections = (body) => {
   return sections;
 };
 
-/** One short line of body text, for the dialog. */
-export const sectionSummary = (section, maxChars = 150) => {
-  const paragraph = section.blocks.find((b) => b.type === 'p');
-  const list = section.blocks.find((b) => b.type === 'list');
-  const text = paragraph?.text || list?.items[0] || '';
-
+/**
+ * Trim to the first sentence where that fits, and to a word boundary
+ * otherwise. Cutting at a fixed character count lands mid-phrase and reads as
+ * though the text were damaged.
+ */
+const shorten = (text, maxChars) => {
   if (text.length <= maxChars) return text;
-  return `${text.slice(0, maxChars - 1).trimEnd()}…`;
+
+  const [sentence] = text.split(/(?<=[.!?])\s+/);
+  if (sentence.length <= maxChars) return sentence;
+
+  const cut = text.slice(0, maxChars);
+  return `${cut.slice(0, cut.lastIndexOf(' ')).replace(/[,;:—-]$/, '')}…`;
+};
+
+/**
+ * A change's body as bullet points, in document order. Notes mix paragraphs
+ * and lists freely; both read as bullets here, so every change is scanned the
+ * same way rather than some being prose and some being lists.
+ */
+export const sectionBullets = (section, { limit, maxChars } = {}) => {
+  const bullets = [];
+
+  for (const block of section.blocks) {
+    if (block.type === 'list') {
+      bullets.push(...block.items);
+    } else if (block.text) {
+      bullets.push(block.text);
+    }
+  }
+
+  const trimmed = maxChars ? bullets.map((b) => shorten(b, maxChars)) : bullets;
+
+  return limit ? trimmed.slice(0, limit) : trimmed;
 };

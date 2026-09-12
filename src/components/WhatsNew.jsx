@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowRightIcon, MegaphoneIcon } from '@heroicons/react/24/outline';
-import { fetchReleases, formatReleaseDate, parseReleaseSections, sectionSummary } from '../services/githubReleases';
-import { ReleaseSummaryLine } from './ReleaseNotes';
+import { fetchReleases, formatReleaseDate, parseReleaseSections, sectionBullets } from '../services/githubReleases';
+import ReleaseNotes from './ReleaseNotes';
 import Badge from './ui/Badge';
 import Button from './ui/Button';
 import Modal from './ui/Modal';
@@ -96,12 +96,12 @@ export default function WhatsNew() {
                                 {section.heading}
                               </span>
                             ) : (
-                              <ReleaseSummaryLine text={sectionSummary(section)} />
+                              <ReleaseNotes items={sectionBullets(section, { limit: 2, maxChars: 120 })} />
                             )}
                           </div>
                           {section.heading && (
-                            <div className="pl-[54px] -mt-0.5">
-                              <ReleaseSummaryLine text={sectionSummary(section)} />
+                            <div className="pl-[54px]">
+                              <ReleaseNotes items={sectionBullets(section, { limit: 2, maxChars: 120 })} />
                             </div>
                           )}
                         </li>
