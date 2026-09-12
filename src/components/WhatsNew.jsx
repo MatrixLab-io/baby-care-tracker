@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowRightIcon, MegaphoneIcon } from '@heroicons/react/24/outline';
+import { ArrowRightIcon, SparklesIcon, TagIcon } from '@heroicons/react/24/outline';
 import { fetchReleases, formatReleaseDate, parseReleaseSections, sectionBullets } from '../services/githubReleases';
 import ReleaseNotes from './ReleaseNotes';
 import Badge from './ui/Badge';
@@ -48,7 +48,10 @@ export default function WhatsNew() {
         aria-label={hasNew ? "What's new — unread release" : "What's new"}
         className="btn btn-secondary btn-sm w-9 px-0 relative"
       >
-        <MegaphoneIcon className="w-[18px] h-[18px]" aria-hidden="true" />
+        <SparklesIcon
+          className={`w-[18px] h-[18px] ${hasNew ? 'motion-sparkle text-accent' : ''}`}
+          aria-hidden="true"
+        />
         {hasNew && (
           <span
             className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-accent border-2 border-surface"
@@ -73,6 +76,7 @@ export default function WhatsNew() {
                 <div key={release.id} className="rounded-control border border-line bg-surface-2 p-4">
                   <div className="flex items-center justify-between gap-3 mb-3">
                     <div className="flex items-center gap-1.5 min-w-0">
+                      <TagIcon className="w-4 h-4 shrink-0 text-ink-3" aria-hidden="true" />
                       <span className="text-sm font-semibold text-ink truncate">
                         {release.name || release.tag_name}
                       </span>

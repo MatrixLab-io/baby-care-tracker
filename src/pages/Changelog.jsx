@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { DocumentTextIcon } from '@heroicons/react/24/outline';
+import { DocumentTextIcon, TagIcon } from '@heroicons/react/24/outline';
 import { fetchReleases, formatReleaseDate, parseReleaseSections, sectionBullets } from '../services/githubReleases';
 import AppShell from '../components/AppShell';
 import ReleaseNotes from '../components/ReleaseNotes';
@@ -70,6 +70,7 @@ const Changelog = () => {
               <Card key={release.id} as="article">
                 <div className="flex flex-wrap items-center justify-between gap-2 mb-4 pb-3 border-b border-line">
                   <div className="flex items-center gap-2 min-w-0">
+                    <TagIcon className="w-[18px] h-[18px] shrink-0 text-ink-3" aria-hidden="true" />
                     <h2 className="text-[17px] font-bold text-ink truncate">
                       {release.name || release.tag_name}
                     </h2>

@@ -25,6 +25,12 @@
   0%, 100% { opacity: 1; }
   50%      { opacity: 0.85; }
 }
+/* The What's New sparkle breathes only while a release is unread, so the
+   motion carries state rather than decorating the header. */
+@keyframes ml-sparkle-pulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50%      { transform: scale(1.14); opacity: 0.7; }
+}
 /* Toasts and the update prompt slide in from the bottom edge. */
 @keyframes ml-slide-up {
   from { opacity: 0; transform: translateY(20px); }
@@ -61,6 +67,10 @@
   .motion-pulse-soft {
     animation: ml-pulse-soft 3s ease-in-out infinite;
   }
+
+  .motion-sparkle {
+    animation: ml-sparkle-pulse 2.2s ease-in-out infinite;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -69,7 +79,8 @@
   .motion-tile,
   .motion-tile-live,
   .motion-slide-up,
-  .motion-pulse-soft {
+  .motion-pulse-soft,
+  .motion-sparkle {
     animation: none !important;
     opacity: 1;
   }
