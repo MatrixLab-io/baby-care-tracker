@@ -91,6 +91,50 @@
   .badge-danger { @apply bg-danger-bg text-danger-fg; }
   .badge-skip { @apply bg-skip-bg text-skip-fg; }
 
+  /* --- Banners -------------------------------------------------------------
+     Shopify/Polaris shape: a lightly tinted field, the status colour carried by
+     the border and the icon, and copy in the ordinary ink colours so it stays
+     readable. The status *-bg tokens are pitched for a 20px badge — used as a
+     full-width fill they read as a solid slab, which is what went wrong in
+     light mode. So the fill mixes that token back toward the surface, and the
+     token itself becomes the border. */
+  .banner {
+    @apply relative rounded-card border p-4;
+  }
+  .banner-title {
+    @apply text-sm font-semibold text-ink;
+  }
+  .banner-body {
+    @apply text-[13px] leading-relaxed text-ink-2;
+  }
+  .banner-divider {
+    @apply border-t border-line;
+  }
+
+  .banner-danger {
+    background-color: color-mix(in srgb, var(--ml-danger-bg) 45%, var(--ml-surface));
+    border-color: var(--ml-danger-bg);
+  }
+  .banner-danger .banner-icon { color: var(--ml-danger-fg); }
+
+  .banner-caution {
+    background-color: color-mix(in srgb, var(--ml-new-bg) 40%, var(--ml-surface));
+    border-color: var(--ml-new-bg);
+  }
+  .banner-caution .banner-icon { color: var(--ml-new-fg); }
+
+  .banner-info {
+    background-color: color-mix(in srgb, var(--ml-soon-bg) 45%, var(--ml-surface));
+    border-color: var(--ml-soon-bg);
+  }
+  .banner-info .banner-icon { color: var(--ml-soon-fg); }
+
+  .banner-success {
+    background-color: color-mix(in srgb, var(--ml-live-bg) 45%, var(--ml-surface));
+    border-color: var(--ml-live-bg);
+  }
+  .banner-success .banner-icon { color: var(--ml-live-fg); }
+
   /* --- Chips (selectable pills) ------------------------------------------- */
   .chip {
     @apply inline-flex items-center gap-1.5 h-[34px] px-3.5 rounded-full border border-line-strong bg-surface text-sm font-medium text-ink cursor-pointer transition-colors duration-150 hover:bg-surface-2;
