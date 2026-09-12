@@ -48,15 +48,12 @@ export default function WhatsNew() {
         aria-label={hasNew ? "What's new — unread release" : "What's new"}
         className="btn btn-secondary btn-sm w-9 px-0 relative"
       >
-        <SparklesIcon
-          className={`w-[18px] h-[18px] ${hasNew ? 'motion-sparkle text-accent' : ''}`}
-          aria-hidden="true"
-        />
+        <SparklesIcon className="w-[18px] h-[18px]" aria-hidden="true" />
         {hasNew && (
-          <span
-            className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-accent border-2 border-surface"
-            aria-hidden="true"
-          />
+          <span className="absolute -top-1 -right-1 flex w-2.5 h-2.5" aria-hidden="true">
+            <span className="motion-ping absolute inline-flex w-full h-full rounded-full bg-accent opacity-75" />
+            <span className="relative inline-flex w-2.5 h-2.5 rounded-full bg-accent ring-2 ring-surface" />
+          </span>
         )}
       </button>
 
