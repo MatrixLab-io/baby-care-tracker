@@ -92,47 +92,56 @@
   .badge-skip { @apply bg-skip-bg text-skip-fg; }
 
   /* --- Banners -------------------------------------------------------------
-     Shopify/Polaris shape: a lightly tinted field, the status colour carried by
-     the border and the icon, and copy in the ordinary ink colours so it stays
-     readable. The status *-bg tokens are pitched for a 20px badge — used as a
-     full-width fill they read as a solid slab, which is what went wrong in
-     light mode. So the fill mixes that token back toward the surface, and the
-     token itself becomes the border. */
+     Two zones, as Shopify draws them: a saturated header bar carrying the icon,
+     the title and the dismiss control, over a plain surface body. The bar reuses
+     the badge token pairs, which are already contrast-checked in both themes, so
+     no new colours are introduced.
+
+     A banner with no title has no bar to put one in, so it falls back to the
+     compact single-row form — the right shape for a one-line field error. */
   .banner {
-    @apply relative rounded-card border p-4;
+    @apply rounded-card border overflow-hidden bg-surface;
   }
-  .banner-title {
-    @apply text-sm font-semibold text-ink;
+  .banner-bar {
+    @apply flex items-start gap-2 px-4 py-2.5 text-sm font-semibold;
   }
-  .banner-body {
-    @apply text-[13px] leading-relaxed text-ink-2;
+  .banner-content {
+    @apply p-4 text-[13px] leading-relaxed text-ink-2;
+  }
+  .banner-dismiss {
+    @apply shrink-0 -mr-1.5 -mt-0.5 p-1 rounded-[4px] cursor-pointer transition-colors;
+    color: inherit;
+  }
+  .banner-dismiss:hover {
+    background-color: rgb(0 0 0 / 0.1);
   }
   .banner-divider {
     @apply border-t border-line;
   }
 
-  .banner-danger {
-    background-color: color-mix(in srgb, var(--ml-danger-bg) 45%, var(--ml-surface));
-    border-color: var(--ml-danger-bg);
+  /* Compact form: one tinted row, used when there is no title. */
+  .banner-compact {
+    @apply flex items-start gap-3 p-3.5 rounded-control border-transparent;
   }
+
+  .banner-danger { border-color: var(--ml-danger-bg); }
+  .banner-danger .banner-bar,
+  .banner-danger.banner-compact { background-color: var(--ml-danger-bg); color: var(--ml-danger-fg); }
   .banner-danger .banner-icon { color: var(--ml-danger-fg); }
 
-  .banner-caution {
-    background-color: color-mix(in srgb, var(--ml-new-bg) 40%, var(--ml-surface));
-    border-color: var(--ml-new-bg);
-  }
+  .banner-caution { border-color: var(--ml-new-bg); }
+  .banner-caution .banner-bar,
+  .banner-caution.banner-compact { background-color: var(--ml-new-bg); color: var(--ml-new-fg); }
   .banner-caution .banner-icon { color: var(--ml-new-fg); }
 
-  .banner-info {
-    background-color: color-mix(in srgb, var(--ml-soon-bg) 45%, var(--ml-surface));
-    border-color: var(--ml-soon-bg);
-  }
+  .banner-info { border-color: var(--ml-soon-bg); }
+  .banner-info .banner-bar,
+  .banner-info.banner-compact { background-color: var(--ml-soon-bg); color: var(--ml-soon-fg); }
   .banner-info .banner-icon { color: var(--ml-soon-fg); }
 
-  .banner-success {
-    background-color: color-mix(in srgb, var(--ml-live-bg) 45%, var(--ml-surface));
-    border-color: var(--ml-live-bg);
-  }
+  .banner-success { border-color: var(--ml-live-bg); }
+  .banner-success .banner-bar,
+  .banner-success.banner-compact { background-color: var(--ml-live-bg); color: var(--ml-live-fg); }
   .banner-success .banner-icon { color: var(--ml-live-fg); }
 
   /* --- Chips (selectable pills) ------------------------------------------- */

@@ -13,21 +13,30 @@ const TONES = {
 };
 
 /**
- * Inline message block, Polaris banner shape: tinted field, status colour in
- * the border and icon, copy in ordinary ink. Status colour carries meaning,
- * never decoration.
+ * Shopify-style banner: a saturated header bar with the icon and title, over a
+ * plain body. Without a title there is no bar to fill, so it falls back to the
+ * compact tinted row — the right shape for a one-line field error.
  */
 export default function Alert({ tone = 'info', title, icon, children, className = '' }) {
   const { icon: ToneIcon, role } = TONES[tone];
   const Icon = icon || ToneIcon;
 
-  return (
-    <div role={role} className={`banner banner-${tone} flex items-start gap-3 ${className}`}>
-      <Icon className="banner-icon w-5 h-5 shrink-0 mt-px" aria-hidden="true" />
-      <div className="min-w-0">
-        {title && <p className="banner-title mb-0.5">{title}</p>}
-        <div className="banner-body">{children}</div>
+  if (!title) {
+    return (
+      <div role={role} className={`banner banner-${tone} banner-compact ${className}`}>
+        <Icon className="w-5 h-5 shrink-0 mt-px" aria-hidden="true" />
+        <div className="text-sm leading-relaxed min-w-0">{children}</div>
       </div>
+    );
+  }
+
+  return (
+    <div role={role} className={`banner banner-${tone} ${className}`}>
+      <div className="banner-bar">
+        <Icon className="w-[18px] h-[18px] shrink-0 mt-px" aria-hidden="true" />
+        <span className="min-w-0">{title}</span>
+      </div>
+      <div className="banner-content">{children}</div>
     </div>
   );
 }
