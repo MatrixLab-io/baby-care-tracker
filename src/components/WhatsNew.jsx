@@ -84,18 +84,26 @@ export default function WhatsNew() {
                   {sections.length > 0 ? (
                     <ul className="flex flex-col gap-3">
                       {sections.map((section, i) => (
-                        <li key={i} className="grid grid-cols-[auto_1fr] gap-x-2.5 gap-y-1 items-start">
-                          <Badge tone={section.tone} className="mt-0.5">
-                            {section.label}
-                          </Badge>
-                          <div className="flex flex-col gap-0.5 min-w-0">
-                            {section.heading && (
+                        <li key={i} className="flex flex-col gap-1">
+                          <div className="flex items-start gap-2">
+                            <Badge tone={section.tone} className="mt-0.5 shrink-0">
+                              {section.label}
+                            </Badge>
+                            {/* A release with no sub-heading puts its text beside the badge
+                                rather than stranding the badge on a line of its own. */}
+                            {section.heading ? (
                               <span className="text-[13px] font-semibold text-ink leading-snug">
                                 {section.heading}
                               </span>
+                            ) : (
+                              <ReleaseSummaryLine text={sectionSummary(section)} />
                             )}
-                            <ReleaseSummaryLine text={sectionSummary(section)} />
                           </div>
+                          {section.heading && (
+                            <div className="pl-[54px] -mt-0.5">
+                              <ReleaseSummaryLine text={sectionSummary(section)} />
+                            </div>
+                          )}
                         </li>
                       ))}
                     </ul>

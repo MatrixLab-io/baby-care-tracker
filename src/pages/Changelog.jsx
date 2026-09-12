@@ -81,14 +81,16 @@ const Changelog = () => {
                 {sections.length > 0 ? (
                   <div className="flex flex-col gap-5">
                     {sections.map((section, i) => (
-                      <div key={i} className="grid grid-cols-[auto_1fr] gap-x-2.5 gap-y-1.5 items-start">
-                        <Badge tone={section.tone} className="mt-0.5">
-                          {section.label}
-                        </Badge>
-                        <div className="flex flex-col gap-1.5 min-w-0">
+                      <div key={i} className="flex flex-col gap-2">
+                        <div className="flex items-start gap-2">
+                          <Badge tone={section.tone} className="mt-0.5 shrink-0">
+                            {section.label}
+                          </Badge>
                           {section.heading && (
                             <h3 className="text-sm font-semibold text-ink leading-snug">{section.heading}</h3>
                           )}
+                        </div>
+                        <div className={section.heading ? 'sm:pl-[54px]' : ''}>
                           <ReleaseNotes blocks={section.blocks} />
                         </div>
                       </div>
