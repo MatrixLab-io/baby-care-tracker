@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowRightIcon, SparklesIcon } from '@heroicons/react/24/outline';
+import { ArrowRightIcon, MegaphoneIcon } from '@heroicons/react/24/outline';
 import { fetchReleases, formatReleaseDate, parseReleaseSections, sectionSummary } from '../services/githubReleases';
 import { ReleaseSummaryLine } from './ReleaseNotes';
 import Badge from './ui/Badge';
@@ -48,7 +48,7 @@ export default function WhatsNew() {
         aria-label={hasNew ? "What's new — unread release" : "What's new"}
         className="btn btn-secondary btn-sm w-9 px-0 relative"
       >
-        <SparklesIcon className="w-[18px] h-[18px]" aria-hidden="true" />
+        <MegaphoneIcon className="w-[18px] h-[18px]" aria-hidden="true" />
         {hasNew && (
           <span
             className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-accent border-2 border-surface"
@@ -84,18 +84,16 @@ export default function WhatsNew() {
                   {sections.length > 0 ? (
                     <ul className="flex flex-col gap-3">
                       {sections.map((section, i) => (
-                        <li key={i} className="flex flex-col gap-1">
-                          <div className="flex items-start gap-2">
-                            <Badge tone={section.tone} className="mt-0.5 shrink-0">
-                              {section.label}
-                            </Badge>
+                        <li key={i} className="grid grid-cols-[auto_1fr] gap-x-2.5 gap-y-1 items-start">
+                          <Badge tone={section.tone} className="mt-0.5">
+                            {section.label}
+                          </Badge>
+                          <div className="flex flex-col gap-0.5 min-w-0">
                             {section.heading && (
                               <span className="text-[13px] font-semibold text-ink leading-snug">
                                 {section.heading}
                               </span>
                             )}
-                          </div>
-                          <div className="pl-[54px] -mt-0.5">
                             <ReleaseSummaryLine text={sectionSummary(section)} />
                           </div>
                         </li>
